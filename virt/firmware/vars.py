@@ -16,6 +16,7 @@ from virt.firmware.efi import ucs16
 from virt.firmware.efi import certs
 
 from virt.firmware.varstore import aws
+from virt.firmware.varstore import azure
 from virt.firmware.varstore import jstore
 from virt.firmware.varstore import autodetect
 
@@ -148,6 +149,8 @@ def main():
                         'the --input FILE has.', metavar = 'FILE')
     pgroup.add_argument('--output-aws', dest = 'output_aws', type = str,
                         help = 'write aws vars to FILE', metavar = 'FILE')
+    pgroup.add_argument('--output-azure', dest = 'output_azure', type = str,
+                        help = 'write azure disk template to FILE', metavar = 'FILE')
     pgroup.add_argument('--output-json', dest = 'output_json', type = str,
                         help = 'write json dump to FILE', metavar = 'FILE')
     options = parser.parse_args()
@@ -312,6 +315,13 @@ def main():
             print(aws.AwsVarStore.base64_varstore(varlist).decode())
         else:
             aws.AwsVarStore.write_varstore(options.output_aws, varlist)
+
+    if options.output_azure:
+        if options.output_azure == "-":
+            j = azure.AzureDiskTemplate.json_varstore(varlist)
+            print(json.dumps(j, indent = 4))
+        else:
+            azure.AzureDiskTemplate.write_varstore(options.output_azure, varlist)
 
     if options.output_json:
         if options.output_json == "-":
