@@ -49,17 +49,18 @@ case "$COMMAND" in
             exit 1
         fi
 
-        [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
-            echo "Adding $UKI_FILE_ESP to ESP and UEFI boot entries"
-
-        # Copy the UKI to the ESP when $BOOT and ESP differ
+        # Move the UKI to the ESP when $BOOT and ESP differ
         if [ "$UKI_FILE_BOOT" != "$UKI_FILE_ESP" -a ! -f "$UKI_FILE_ESP" ]; then
-            install -D -m 0644 "$UKI_FILE_BOOT" "$UKI_FILE_ESP" || {
-                echo "Error: could not copy '$UKI_FILE_BOOT' to '$UKI_FILE_ESP'." >&2
+            [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
+                echo "Moving $UKI_FILE_BOOT to ESP"
+            mv "$UKI_FILE_BOOT" "$UKI_FILE_ESP" || {
+                echo "Error: could not move '$UKI_FILE_BOOT' to '$UKI_FILE_ESP'." >&2
 	        exit 1
             }
         fi
 
+        [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
+            echo "Adding $UKI_FILE_ESP to UEFI boot entries"
         kernel-bootcfg $LOGLEVEL --add-uki "$UKI_FILE_ESP" --title "$KERNEL_VERSION" --once
         ;;
     *)
