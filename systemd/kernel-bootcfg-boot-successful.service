@@ -2,8 +2,10 @@
 
 [Unit]
 Description=UKI Successful Boot
-After=sysinit.target
-Before=systemd-user-sessions.service
+Requires=boot-complete.target
+After=local-fs.target boot-complete.target
+Conflicts=shutdown.target
+Before=shutdown.target
 ConditionFirmware=uefi
 ConditionPathExists=!/etc/initrd-release
 
