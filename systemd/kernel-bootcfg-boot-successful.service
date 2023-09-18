@@ -4,6 +4,7 @@
 Description=UKI Successful Boot
 After=sysinit.target
 Before=systemd-user-sessions.service
+ConditionFirmware=uefi
 ConditionPathExists=!/etc/initrd-release
 
 [Service]
