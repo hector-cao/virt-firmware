@@ -23,12 +23,18 @@ fi
 UKI_FILE_BOOT="$UKI_DIR_BOOT/$ENTRY_TOKEN-$KERNEL_VERSION.efi"
 UKI_FILE_ESP="$UKI_DIR_ESP/$ENTRY_TOKEN-$KERNEL_VERSION.efi"
 
+if [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ]; then
+    LOGLEVEL="--loglevel info"
+else
+    LOGLEVEL="--loglevel error"
+fi
+
 case "$COMMAND" in
     remove)
         [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
             echo "Removing $UKI_DIR_ESP/$ENTRY_TOKEN-$KERNEL_VERSION.efi from UEFI boot entries"
         for uki in "$UKI_DIR_ESP/$ENTRY_TOKEN-$KERNEL_VERSION.efi"; do
-            [ -f "$uki" ] && kernel-bootcfg --remove-uki "$uki"
+            [ -f "$uki" ] && kernel-bootcfg $LOGLEVEL --remove-uki "$uki"
         done
         ;;
     add)
@@ -51,7 +57,7 @@ case "$COMMAND" in
             }
         fi
 
-        kernel-bootcfg --add-uki "$UKI_FILE_ESP" --title "$KERNEL_VERSION" --once
+        kernel-bootcfg $LOGLEVEL --add-uki "$UKI_FILE_ESP" --title "$KERNEL_VERSION" --once
         ;;
     *)
         exit 0
