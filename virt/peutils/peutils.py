@@ -204,7 +204,7 @@ def pe_print_section(pe, sec, indent, verbose):
             npe = pefile.PE(data = sec.get_data())
             for nsec in npe.sections:
                 pe_print_section(npe, nsec, indent + 6, verbose)
-            zboot_binary(pe, indent + 6, verbose)
+            zboot_binary(npe, indent + 6, verbose)
             pe_print_sigs(None, npe, indent + 6, False, verbose)
         except pefile.PEFormatError:
             print(f'# {ii}   not a PE binary')
