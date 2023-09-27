@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """ pe (efi) binary utilities """
 import sys
+import gzip
 import struct
 import argparse
 
@@ -135,6 +136,30 @@ def pe_print_sigs(filename, pe, indent, extract, verbose):
             pos += slen
             pos = (pos + 7) & ~7 # align
 
+def zboot_binary(pe, indent, verbose):
+    i = f'{"":{indent}s}'
+    (mz, zimg, zoff, zsize, r1, r2, alg) = struct.unpack_from('<I4sIIII8s', pe.get_data())
+    if zimg != b'zimg':
+        return
+
+    zalg = getcstr(alg).decode()
+    print(f'# {i}zboot: 0x{zoff:x} +0x{zsize:x} ({zalg})')
+
+    zdata = pe.__data__[ zoff : zoff + zsize ]
+    if zalg == 'gzip':
+        data = gzip.decompress(zdata)
+    else:
+        return
+
+    print(f'# {i}   embedded binary')
+    try:
+        npe = pefile.PE(data = data)
+        for nsec in npe.sections:
+            pe_print_section(npe, nsec, indent + 6, verbose)
+        pe_print_sigs(None, npe, indent + 6, False, verbose)
+    except pefile.PEFormatError:
+        print(f'# {i}      not a PE binary')
+
 # pylint: disable=too-many-branches
 def pe_print_section(pe, sec, indent, verbose):
     i  = f'{"":{indent}s}'
@@ -179,6 +204,7 @@ def pe_print_section(pe, sec, indent, verbose):
             npe = pefile.PE(data = sec.get_data())
             for nsec in npe.sections:
                 pe_print_section(npe, nsec, indent + 6, verbose)
+            zboot_binary(pe, indent + 6, verbose)
             pe_print_sigs(None, npe, indent + 6, False, verbose)
         except pefile.PEFormatError:
             print(f'# {ii}   not a PE binary')
@@ -189,6 +215,7 @@ def efi_binary(filename, extract = False, verbose = False):
         pe = pefile.PE(filename)
         for sec in pe.sections:
             pe_print_section(pe, sec, 3, verbose)
+        zboot_binary(pe, 3, verbose)
         pe_print_sigs(filename, pe, 3, extract, verbose)
     except pefile.PEFormatError:
         print('#    not a PE binary')
