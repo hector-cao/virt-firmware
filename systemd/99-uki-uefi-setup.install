@@ -53,6 +53,7 @@ case "$COMMAND" in
         if [ "$UKI_FILE_BOOT" != "$UKI_FILE_ESP" -a ! -f "$UKI_FILE_ESP" ]; then
             [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
                 echo "Moving $UKI_FILE_BOOT to ESP"
+            mkdir -p "$UKI_FILE_ESP"
             mv "$UKI_FILE_BOOT" "$UKI_FILE_ESP" || {
                 echo "Error: could not move '$UKI_FILE_BOOT' to '$UKI_FILE_ESP'." >&2
 	        exit 1
