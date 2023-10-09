@@ -41,5 +41,5 @@ rootfs=$(mount | awk '$3 == "/" { print $5 }')
 if test "$rootfs" = "btrfs"; then
     rootid=$($sudo btrfs subvolume list / | awk '/path root/ { print $2 }')
     echo "# btrfs root subvolume id: $rootid"
-    (set -x; $sudo btrfs subvolume set-default $rootid)
+    (set -x; $sudo btrfs subvolume set-default $rootid /)
 fi
