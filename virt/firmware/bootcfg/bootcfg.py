@@ -100,6 +100,14 @@ class EfiBootConfig:
                 return nr
         return None
 
+    def find_title_entry(self, title):
+        for (nr, entry) in self.bentr.items():
+            if not entry:
+                continue
+            if str(entry.title) == str(title):
+                return nr
+        return None
+
     def find_devpath_entry(self, devicepath):
         blob = bytes(devicepath)
         for (nr, entry) in self.bentr.items():
@@ -118,6 +126,11 @@ class EfiBootConfig:
         self.bentr[nr] = entry
         self.unused.append(nr)
         return nr
+
+    def get_entry(self, nr):
+        if nr >= len(self.bentr):
+            return None
+        return self.bentr[nr]
 
     def remove_entry(self, nr):
         del self.bentr[nr]
