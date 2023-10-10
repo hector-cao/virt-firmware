@@ -31,14 +31,17 @@ fi
 
 case "$COMMAND" in
     remove)
-        [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
-            echo "Removing $UKI_FILE_ESP from UEFI boot entries"
-        kernel-bootcfg $LOGLEVEL --remove-uki "$UKI_FILE_ESP"
-        if [ "$UKI_FILE_BOOT" != "$UKI_FILE_ESP" -a -f "$UKI_FILE_ESP" ]; then
+        # $ENTRY_TOKEN might have changed since "kernel-install add"
+        for kernel in "$UKI_DIR_ESP/"*"-$KERNEL_VERSION.efi"; do
             [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
-                echo "Removing $UKI_FILE_ESP from ESP"
-            rm -f "$UKI_FILE_ESP"
-        fi
+                echo "Removing $kernel from UEFI boot entries"
+            kernel-bootcfg $LOGLEVEL --remove-uki "$kernel"
+            if [ "$UKI_FILE_BOOT" != "$UKI_FILE_ESP" ]; then
+                [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
+                    echo "Removing $kernel from ESP"
+                rm -f "$kernel"
+            fi
+        done
         ;;
     add)
         [ "$KERNEL_INSTALL_LAYOUT" = "uki" ] || exit 0
