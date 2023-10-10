@@ -32,6 +32,7 @@ fi
 case "$COMMAND" in
     remove)
         # $ENTRY_TOKEN might have changed since "kernel-install add"
+        # fedora cloud image kickstart resets machine-id for example
         for kernel in "$UKI_DIR_ESP/"*"-$KERNEL_VERSION.efi"; do
             [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
                 echo "Removing $kernel from UEFI boot entries"
