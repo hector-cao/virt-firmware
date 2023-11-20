@@ -12,6 +12,7 @@ from virt.firmware.efi import ucs16
 
 from virt.firmware.varstore import edk2
 from virt.firmware.varstore import aws
+from virt.firmware.varstore import json as jstore
 
 
 ##################################################################################################
@@ -141,6 +142,7 @@ def main():
 
     edk2store = None
     awsstore = None
+    jsonstore = None
     varlist = efivar.EfiVarList()
 
     if options.input:
@@ -153,6 +155,9 @@ def main():
         elif aws.AwsVarStore.probe(options.input):
             awsstore = aws.AwsVarStore(options.input)
             varlist = awsstore.get_varlist()
+        elif jstore.JsonVarStore.probe(options.input):
+            jsonstore = jstore.JsonVarStore(options.input)
+            varlist = jsonstore.get_varlist()
         else:
             logging.error("unknown input file format")
             sys.exit(1)
@@ -281,6 +286,8 @@ def main():
             edk2store.write_varstore(options.output, varlist)
         elif awsstore:
             awsstore.write_varstore(options.output, varlist)
+        elif jsonstore:
+            jsonstore.write_varstore(options.output, varlist)
         else:
             logging.error("no input file specified (needed as edk2 varstore template)")
             sys.exit(1)
@@ -292,13 +299,10 @@ def main():
             aws.AwsVarStore.write_varstore(options.output_aws, varlist)
 
     if options.output_json:
-        j = json.dumps(varlist, cls=efijson.EfiJSONEncoder, indent = 4)
         if options.output_json == "-":
-            print(j)
+            print(jstore.JsonVarStore.json_varstore(varlist))
         else:
-            logging.info('writing json varstore to %s', options.output_json)
-            with open(options.output_json, "w", encoding = 'utf-8') as f:
-                f.write(j)
+            jstore.JsonVarStore.write_varstore(options.output_json, varlist)
 
     return 0
 
