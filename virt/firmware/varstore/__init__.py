@@ -1,2 +1,2 @@
 """ efi varstore parsers """
-__all__ = [ "edk2", "linux", "aws", "json" ]
+__all__ = [ "edk2", "linux", "aws", "jstore" ]

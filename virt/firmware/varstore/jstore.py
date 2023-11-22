@@ -1,8 +1,6 @@
 #!/usr/bin/python
 """ linux efivarfs varstore parser """
-import os
 import json
-import struct
 import logging
 
 from virt.firmware.efi import efijson

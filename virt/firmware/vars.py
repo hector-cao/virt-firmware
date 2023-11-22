@@ -12,7 +12,7 @@ from virt.firmware.efi import ucs16
 
 from virt.firmware.varstore import edk2
 from virt.firmware.varstore import aws
-from virt.firmware.varstore import json as jstore
+from virt.firmware.varstore import jstore
 
 
 ##################################################################################################
