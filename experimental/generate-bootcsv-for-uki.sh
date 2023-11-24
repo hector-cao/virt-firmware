@@ -53,7 +53,7 @@ ukis="$(ls --sort=time $esp/EFI/Linux/*.efi)"
 for uki in $ukis; do
     name="$(basename $uki .efi)"
     name="${name#${mid}-}"
-    msg_stderr "#   $name"
+    msg_stderr "#    add $name"
     echo "shimx64.efi,$name,${uki#$esp} ,comment"
 done \
     | tr '/' '\\' \
