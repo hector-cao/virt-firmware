@@ -43,7 +43,7 @@ msg_stderr() {
 
 # go!
 shim="$(ls $esp/EFI/*/shim${arch}.efi)"
-csv="${shim%/*}/BOOT${ARCH}.CSV.test"
+csv="${shim%/*}/BOOT${ARCH}.CSV"
 if test -f /etc/machine-id; then
     mid="$(cat /etc/machine-id)"
 else
