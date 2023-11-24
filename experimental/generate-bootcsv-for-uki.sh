@@ -41,13 +41,19 @@ msg_stderr() {
 # go!
 shim="$(ls $esp/EFI/*/shim${arch}.efi)"
 csv="${shim%/*}/BOOT${ARCH}.CSV.test"
+if test -f /etc/machine-id; then
+    mid="$(cat /etc/machine-id)"
+else
+    mid=""
+fi
 msg_stderr "# generate $csv"
 
 echo -ne '\xff\xfe' > "$csv"
 ukis="$(ls --sort=time $esp/EFI/Linux/*.efi)"
 for uki in $ukis; do
-    name=$(basename $uki .efi)
-    msg_stderr "#  - $name"
+    name="$(basename $uki .efi)"
+    name="${name#${mid}-}"
+    msg_stderr "#   $name"
     echo "shimx64.efi,$name,${uki#$esp} ,comment"
 done \
     | tr '/' '\\' \
