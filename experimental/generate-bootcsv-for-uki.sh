@@ -49,7 +49,7 @@ fi
 msg_stderr "# generate $csv"
 
 echo -ne '\xff\xfe' > "$csv"
-ukis="$(ls --sort=time $esp/EFI/Linux/*.efi)"
+ukis="$(ls --sort=time --reverse $esp/EFI/Linux/*.efi)"
 for uki in $ukis; do
     name="$(basename $uki .efi)"
     name="${name#${mid}-}"
