@@ -14,9 +14,9 @@ from virt.firmware.efi import efijson
 from virt.firmware.efi import devpath
 from virt.firmware.efi import ucs16
 
-from virt.firmware.varstore import edk2
 from virt.firmware.varstore import aws
 from virt.firmware.varstore import jstore
+from virt.firmware.varstore import autodetect
 
 
 ##################################################################################################
@@ -144,27 +144,15 @@ def main():
     logging.basicConfig(format = '%(levelname)s: %(message)s',
                         level = getattr(logging, options.loglevel.upper()))
 
-    edk2store = None
-    awsstore = None
-    jsonstore = None
+    varstore = None
     varlist = efivar.EfiVarList()
 
     if options.input:
-        if edk2.Edk2VarStore.probe(options.input):
-            edk2store = edk2.Edk2VarStore(options.input)
-            varlist = edk2store.get_varlist()
-        elif edk2.Edk2VarStoreQcow2.probe(options.input):
-            edk2store = edk2.Edk2VarStoreQcow2(options.input)
-            varlist = edk2store.get_varlist()
-        elif aws.AwsVarStore.probe(options.input):
-            awsstore = aws.AwsVarStore(options.input)
-            varlist = awsstore.get_varlist()
-        elif jstore.JsonVarStore.probe(options.input):
-            jsonstore = jstore.JsonVarStore(options.input)
-            varlist = jsonstore.get_varlist()
-        else:
+        varstore = autodetect.open_varstore(options.input)
+        if varstore is None:
             logging.error("unknown input file format")
             sys.exit(1)
+        varlist = varstore.get_varlist()
 
     if options.extract:
         for (key, item) in varlist.items():
@@ -286,12 +274,8 @@ def main():
             varlist.print_compact()
 
     if options.output:
-        if edk2store:
-            edk2store.write_varstore(options.output, varlist)
-        elif awsstore:
-            awsstore.write_varstore(options.output, varlist)
-        elif jsonstore:
-            jsonstore.write_varstore(options.output, varlist)
+        if varstore:
+            varstore.write_varstore(options.output, varlist)
         else:
             logging.error("no input file specified (needed as edk2 varstore template)")
             sys.exit(1)
