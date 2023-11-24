@@ -1,5 +1,8 @@
 #!/bin/sh
 #
+# SPDX-License-Identifier: GPL-2.0-only
+# (c) 2023 Gerd Hoffmann
+#
 # Generate $ESP/EFI/$distro/BOOT$ARCH.CSV
 #
 # Usually 'kernel-bootcfg --update-csv' is better suited for the job,

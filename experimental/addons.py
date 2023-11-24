@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+#
+# SPDX-License-Identifier: GPL-2.0-only
+# (c) 2023 Emanuele Giuseppe Esposito
+#
 # pylint: disable=too-many-instance-attributes,consider-iterating-dictionary
 """ handle UKI addons -- EXPERIMENTAL """
 import os

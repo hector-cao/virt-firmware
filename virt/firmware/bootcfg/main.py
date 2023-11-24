@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+#
+# SPDX-License-Identifier: GPL-2.0-only
+# (c) 2023 Gerd Hoffmann
+#
 """ experimental efi boot config tool """
 import os
 import sys

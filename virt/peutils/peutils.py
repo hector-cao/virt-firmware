@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+#
+# SPDX-License-Identifier: GPL-2.0-only
+# (c) 2023 Gerd Hoffmann
+#
 """ pe (efi) binary utilities """
 import sys
 import gzip

@@ -1,4 +1,9 @@
 #!/usr/bin/python
+#
+# based on pyuefivars which is:
+#   Copyright Amazon.com, Inc.
+#   SPDX-License-Identifier: MIT
+#
 """ aws varstore parser """
 import sys
 import zlib

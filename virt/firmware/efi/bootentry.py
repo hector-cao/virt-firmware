@@ -1,4 +1,8 @@
 #!/usr/bin/python
+#
+# SPDX-License-Identifier: GPL-2.0-only
+# (c) 2023 Gerd Hoffmann
+#
 """
 boot entry decoder
 

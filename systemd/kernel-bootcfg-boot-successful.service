@@ -1,4 +1,7 @@
-#  SPDX-License-Identifier: LGPL-2.1-or-later
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+# (c) 2023 Vitaly Kuznetsov
+#
 
 [Unit]
 Description=UKI Successful Boot

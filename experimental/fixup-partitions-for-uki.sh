@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# SPDX-License-Identifier: GPL-2.0-only
+# (c) 2023 Gerd Hoffmann
+#
 
 if test "$(id --user)" = "0"; then
     sudo=""
