@@ -54,7 +54,7 @@ for uki in $ukis; do
     name="$(basename $uki .efi)"
     name="${name#${mid}-}"
     msg_stderr "#    add $name"
-    echo "shimx64.efi,$name,${uki#$esp} ,comment"
+    echo "shimx64.efi,$name,${uki#$esp} ,Comment"
 done \
     | tr '/' '\\' \
     | iconv -f utf-8 -t ucs-2le >> "$csv"
