@@ -1,7 +1,7 @@
 image: registry.fedoraproject.org/fedora:latest
 
 .instscript: &instscript
-  - dnf install -y python3-pip python3-setuptools python3-devel python3-cryptography
+  - dnf install -y python3-pip python3-setuptools python3-devel python3-cryptography python3-textual
   - dnf install -y make gcc diffutils help2man edk2-ovmf
   - dnf install -y edk2-aarch64 || true # optional
   - pip3 install --user crc32c pylint build twine
