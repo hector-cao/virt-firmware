@@ -4,7 +4,6 @@
 # (c) 2023 Gerd Hoffmann
 #
 """ efi boot menu """
-import os
 import sys
 import argparse
 import subprocess
@@ -15,6 +14,7 @@ from textual.widgets import Header, Static, Label, Button, ListItem, ListView
 from virt.firmware.bootcfg import linuxcfg
 
 class BootMenuApp(App):
+    """  textual app showing the uefi boot menu """
 
     CSS = """
 
@@ -80,7 +80,7 @@ class BootMenuApp(App):
 
         boot = item.id.lstrip('boot')
         self.exit(int(boot))
-        
+
 
 def main():
     parser = argparse.ArgumentParser(
