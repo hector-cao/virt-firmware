@@ -12,8 +12,7 @@ from virt.firmware.efi import guids
 from virt.firmware.efi import ucs16
 from virt.firmware.efi import bootentry
 
-from virt.firmware.varstore import aws
-from virt.firmware.varstore import edk2
+from virt.firmware.varstore import autodetect
 
 class EfiBootConfig:
     """ efi boot configuration """
@@ -171,13 +170,8 @@ class VarStoreEfiBootConfig(EfiBootConfig):
         self.varstore_init(filename)
 
     def varstore_init(self, filename):
-        if edk2.Edk2VarStore.probe(filename):
-            self.varstore = edk2.Edk2VarStore(filename)
-        elif edk2.Edk2VarStoreQcow2.probe(filename):
-            self.varstore = edk2.Edk2VarStoreQcow2(filename)
-        elif aws.AwsVarStore.probe(filename):
-            self.varstore = aws.AwsVarStore(filename)
-        else:
+        self.varstore = autodetect.open_varstore(filename)
+        if self.varstore is None:
             return
 
         self.varlist = self.varstore.get_varlist()
