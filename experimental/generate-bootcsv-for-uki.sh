@@ -25,6 +25,12 @@ if test ! -d "$1/EFI"; then
     exit 1
 fi
 
+if test "$(id --user)" = "0"; then
+    sudo=""
+else
+    sudo="sudo"
+fi
+
 # figure efi arch name
 case "$(uname -m)" in
     aarch64)
@@ -44,14 +50,17 @@ msg_stderr() {
 # go!
 shim="$(ls $esp/EFI/*/shim${arch}.efi)"
 csv="${shim%/*}/BOOT${ARCH}.CSV"
+tcsv=$(mktemp /tmp/BOOT${ARCH}.CSV.XXXXXXXX)
+trap "rm -f $tcsv" EXIT
+
 if test -f /etc/machine-id; then
     mid="$(cat /etc/machine-id)"
 else
     mid=""
 fi
-msg_stderr "# generate $csv"
 
-echo -ne '\xff\xfe' > "$csv"
+msg_stderr "# generate $tcsv"
+echo -ne '\xff\xfe' > "$tcsv"
 ukis="$(ls --sort=time --reverse $esp/EFI/Linux/*.efi)"
 for uki in $ukis; do
     name="$(basename $uki .efi)"
@@ -60,4 +69,7 @@ for uki in $ukis; do
     echo "shimx64.efi,$name,${uki#$esp} ,Comment"
 done \
     | tr '/' '\\' \
-    | iconv -f utf-8 -t ucs-2le >> "$csv"
+    | iconv -f utf-8 -t ucs-2le >> "$tcsv"
+
+msg_stderr "# mv $tcsv -> $csv"
+$sudo cp "$tcsv" "$csv"
