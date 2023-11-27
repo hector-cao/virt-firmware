@@ -17,7 +17,7 @@
 #
 
 # args
-esp="$1"
+esp="${1%/}"
 
 # check
 if test ! -d "$1/EFI"; then
