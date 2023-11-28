@@ -34,7 +34,9 @@ bootdev=$(mount | awk '$3 == "/boot" { print $1 }')
 rootdev=$(mount | awk '$3 == "/"     { print $1 }')
 
 # setup discoverable partitions
-set_type $bootdev "BC13C2FF-59E6-4262-A352-B275FD6F7172"
+if test "$bootdev" != ""; then
+    set_type $bootdev "BC13C2FF-59E6-4262-A352-B275FD6F7172"
+fi
 case "$(uname -m)" in
     x86_64)	set_type $rootdev "4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709";;
     aarch64)	set_type $rootdev "b921b045-1df0-41c3-af44-4c6f280d3fae";;
