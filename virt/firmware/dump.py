@@ -372,11 +372,17 @@ class Edk2Variable(Edk2CommonBase):
                 self.append(f'blob: {len(self.blob)} bytes')
 
     def fmt_state(self):
-        if self.state == 0x3f:
-            return None
-        if self.state == 0x3c:
-            return '(deleted)'
-        return f'state=0x{self.state:x}'
+        if self.state == 0x7f:
+            return '(header-ok)'
+        elif self.state == 0x3f:
+            return '(ok)'
+        elif self.state == 0x3e:
+            return '(del-in-progress)'
+        elif self.state == 0x3c:
+            return '(deleted)' # normal delete process
+        elif self.state == 0x3d:
+            return '(deleted)' # without 'del-in-progress' step
+        return f'state=0x{self.state:x} {label}'
 
     def __str__(self):
         ret = f'variable={guids.name(self.guid)} nsize=0x{self.nsize:x} dsize=0x{self.dsize:x}'
