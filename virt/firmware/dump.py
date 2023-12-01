@@ -344,19 +344,21 @@ class Edk2Variable(Edk2CommonBase):
         self.blob = b''
         self.state = 0
         self.attr = 0
+        self.nsize = 0
+        self.dsize = 0
         if data:
             self.parse(data)
 
     def parse(self, data):
-        (magic, self.state, self.attr, count, time, pk, nsize, dsize, guid) = \
+        (magic, self.state, self.attr, count, time, pk, self.nsize, self.dsize, guid) = \
             struct.unpack_from("<HBxLQ16sLLL16s", data)
         if magic != 0x55aa:
             raise ValueError('end of variable list')
         self.guid = guids.parse_bin(guid, 0)
-        self.name = ucs16.from_ucs16(data [ 60 : 60 + nsize ], 0)
-        self.blob = data [ 60 + nsize :
-                           60 + nsize + dsize ]
-        self.tlen = 60 + nsize + dsize
+        self.name = ucs16.from_ucs16(data [ 60 : 60 + self.nsize ], 0)
+        self.blob = data [ 60 + self.nsize :
+                           60 + self.nsize + self.dsize ]
+        self.tlen = 60 + self.nsize + self.dsize
 
         if self.state == 0x3f:
             var = efivar.EfiVar(self.name,
@@ -377,7 +379,7 @@ class Edk2Variable(Edk2CommonBase):
         return f'state=0x{self.state:x}'
 
     def __str__(self):
-        ret = f'variable={guids.name(self.guid)} size=0x{self.tlen:x}'
+        ret = f'variable={guids.name(self.guid)} nsize=0x{self.nsize:x} dsize=0x{self.dsize:x}'
         ret += f' attr=0x{self.attr:x} name={self.name}'
         state = self.fmt_state()
         if state:
