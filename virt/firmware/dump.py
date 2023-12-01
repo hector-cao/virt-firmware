@@ -353,7 +353,7 @@ class Edk2Variable(Edk2CommonBase):
         if magic != 0x55aa:
             raise ValueError('end of variable list')
         self.guid = guids.parse_bin(guid, 0)
-        self.name = ucs16.from_ucs16(data, 60)
+        self.name = ucs16.from_ucs16(data [ 60 : 60 + nsize ], 0)
         self.blob = data [ 60 + nsize :
                            60 + nsize + dsize ]
         self.tlen = 60 + nsize + dsize
