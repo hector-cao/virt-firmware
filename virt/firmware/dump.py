@@ -359,6 +359,8 @@ class Edk2Variable(Edk2CommonBase):
         self.blob = data [ 60 + self.nsize :
                            60 + self.nsize + self.dsize ]
         self.tlen = 60 + self.nsize + self.dsize
+        if len(data) < self.tlen:
+            raise ValueError('invalid variable entry')
 
         if self.state == 0x3f:
             var = efivar.EfiVar(self.name,
@@ -415,7 +417,7 @@ class Edk2NvData(Edk2CommonBase):
             try:
                 var = Edk2Variable(data [ self.used : ])
             except (ValueError, struct.error) as err:
-                self.append(f'{err}')
+                self.append(f'{err} at offset 0x{self.used:x}')
                 return
             self.used += var.size()
             self.align(4)
