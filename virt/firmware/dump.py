@@ -334,6 +334,7 @@ class Edk2FfsFile(Edk2CommonBase):
         return f'ffsfile={guids.name(self.guid)} size=0x{self.tlen:x} type={self.fmt_type()}'
 
 
+# pylint: disable=too-many-instance-attributes
 class Edk2Variable(Edk2CommonBase):
     """ edk2 (non-volatile) variable """
 
@@ -376,15 +377,15 @@ class Edk2Variable(Edk2CommonBase):
     def fmt_state(self):
         if self.state == 0x7f:
             return '(header-ok)'
-        elif self.state == 0x3f:
+        if self.state == 0x3f:
             return '(ok)'
-        elif self.state == 0x3e:
+        if self.state == 0x3e:
             return '(del-in-progress)'
-        elif self.state == 0x3c:
+        if self.state == 0x3c:
             return '(deleted)' # normal delete process
-        elif self.state == 0x3d:
+        if self.state == 0x3d:
             return '(deleted)' # without 'del-in-progress' step
-        return f'state=0x{self.state:x} {label}'
+        return f'state=0x{self.state:x}'
 
     def __str__(self):
         ret = f'variable={guids.name(self.guid)} nsize=0x{self.nsize:x} dsize=0x{self.dsize:x}'
