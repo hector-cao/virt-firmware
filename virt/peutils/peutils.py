@@ -171,6 +171,8 @@ def pe_print_section(pe, sec, indent, verbose):
     if sec.Name.startswith(b'/'):
         idx = getcstr(sec.Name[1:])
         sec.Name = pe_string(pe, int(idx))
+    else:
+        sec.Name = getcstr(sec.Name)
     print(f'# {i}section:'
           f' file 0x{sec.PointerToRawData:08x} +0x{sec.SizeOfRawData:08x}'
           f'  virt 0x{sec.VirtualAddress:08x} +0x{sec.Misc_VirtualSize:08x}'
@@ -192,17 +194,17 @@ def pe_print_section(pe, sec, indent, verbose):
         print_sbat_entries(ii, 'previous', getcstr(levels[poff + 4:]))
         print_sbat_entries(ii, 'latest', getcstr(levels[loff + 4:]))
     if sec.Name in (b'.sdmagic', b'.data.ident', b'.cmdline',
-                    b'.uname\0\0', b'.sbat\0\0\0'):
+                    b'.uname', b'.sbat'):
         lines = sec.get_data().decode().rstrip('\n\0')
         for line in lines.split('\n'):
             print(f'# {ii}{line}')
-    if sec.Name == b'.osrel\0\0':
+    if sec.Name == b'.osrel':
         osrel = sec.get_data().decode().rstrip('\n\0')
         entries = osrel.split('\n')
         for entry in entries:
             if entry.startswith('PRETTY_NAME'):
                 print(f'# {ii}{entry}')
-    if sec.Name == b'.linux\0\0':
+    if sec.Name == b'.linux':
         print(f'# {ii}embedded binary')
         try:
             npe = pefile.PE(data = sec.get_data())
