@@ -29,6 +29,8 @@ def main():
                         help = 'set loglevel to LEVEL', metavar = 'LEVEL')
     parser.add_argument('-i', '--input', dest = 'input', type = str,
                         help = 'read edk2 or aws vars from FILE', metavar = 'FILE')
+    parser.add_argument('--inplace', '--in-place', dest = 'inplace', type = str,
+                        help = 'modify FILE in place', metavar = 'FILE')
     parser.add_argument('--extract-certs', dest = 'extract',
                         action = 'store_true', default = False,
                         help = 'extract all certificates')
@@ -146,6 +148,16 @@ def main():
 
     varstore = None
     varlist = efivar.EfiVarList()
+
+    if options.inplace:
+        if options.input:
+            logging.error("using --inplace is incompatible with --input")
+            sys.exit(1)
+        if options.output:
+            logging.error("using --inplace is incompatible with --output")
+            sys.exit(1)
+        options.input = options.inplace
+        options.output = options.inplace
 
     if options.input:
         varstore = autodetect.open_varstore(options.input)

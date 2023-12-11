@@ -71,5 +71,5 @@ done \
     | tr '/' '\\' \
     | iconv -f utf-8 -t ucs-2le >> "$tcsv"
 
-msg_stderr "# mv $tcsv -> $csv"
+msg_stderr "# cp $tcsv -> $csv"
 $sudo cp "$tcsv" "$csv"
