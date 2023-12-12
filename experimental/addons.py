@@ -279,9 +279,10 @@ def print_addons_folder(path, options):
     return found
 
 
-def show_all_addons(destination, options, global_addons=True):
+def show_all_addons(destination, options, descr=None, global_addons=True):
     print('#' * len(destination))
-    print(destination)
+    descr = f'({descr})' if descr else ""
+    print(f'{destination} {descr}')
     print('#' * len(destination))
 
     found = 0
@@ -306,7 +307,8 @@ def list_addons_path(options):
     destination = options.list_addons
     if options.list_addons is True:
         # look in DEFAULT_RPM_GLOBAL_LOCATION
-        show_all_addons(DEFAULT_RPM_GLOBAL_LOCATION, options, global_addons=False)
+        show_all_addons(DEFAULT_RPM_GLOBAL_LOCATION, options,
+                        descr="global addons in root fs", global_addons=False)
         # look into DEFAULT_RPM_LOCATION/<uname -r>/<uki>.efi.extra.d
         if not os.path.exists(DEFAULT_RPM_LOCATION):
             logging.error('%s does not exist!', DEFAULT_RPM_LOCATION)
@@ -319,7 +321,8 @@ def list_addons_path(options):
                     continue
                 found += 1
                 uki_path = kernel_path + '/' + uki
-                show_all_addons(uki_path, options, global_addons=False)
+                show_all_addons(uki_path, options, descr="uki-specific addons in root fs",
+                                global_addons=False)
         if found == 0:
             print(f'No UKI addons found in {DEFAULT_RPM_LOCATION}*/*.efi.extra.d/')
     else:
@@ -335,21 +338,27 @@ def show_installed_addons(cfg, options):
     *) with --verbose, print all addon sections
     """
     destination = None
+    descr = None
     if options.global_addon:
         destination = check_global_addon_option(options, fail=options.global_addon)
         check_global_addon_exist()
+        descr = "global addons in ESP"
     elif options.uki_title:
         destination = check_title_option(cfg, options)
     elif options.uki_path:
         destination = check_path_option(options.uki_path)
 
+    if descr is None:
+        descr = "uki-specific addons in ESP"
+
     if destination:
-        show_all_addons(destination, options, global_addons=options.global_addon is None)
+        show_all_addons(destination, options, descr=descr,
+                        global_addons=options.global_addon is None)
     else:
         for entry in cfg.bentr.values():
             path = get_devpath(entry.optdata)
             if path:
-                show_all_addons(path, options)
+                show_all_addons(path, options, descr=descr)
 
 
 # pylint: disable=too-many-boolean-expressions,too-many-branches,too-many-statements
