@@ -35,19 +35,15 @@ def get_devpath(optdata):
 
 def check_input_addon_exist(addon):
     """
-    Check if the addon is an actual addon and exists (both in the given location or in
-    DEFAULT_RPM_LOCATION).
+    Check if the addon is an actual addon and exists.
     Returns the full path to the addon.
     """
     if not addon.endswith('.addon.efi'):
         logging.error('addon must end with .addon.efi')
         sys.exit(1)
     if not os.path.exists(addon):
-        old_addon = addon
-        addon = DEFAULT_RPM_LOCATION + addon
-        if not os.path.exists(addon):
-            logging.error('addon %s does not exist, not even in %s', old_addon, addon)
-            sys.exit(1)
+        logging.error('addon %s does not exist', addon)
+        sys.exit(1)
     return addon
 
 
@@ -167,7 +163,7 @@ def rm_addon(path, fail=True):
 def rm_uki_addon(cfg, options):
     """
     rm options.rm_addon
-    *) with no param, just behave like `rm`. If not found, search also in DEFAULT_RPM_LOCATION.
+    *) with no param, just behave like `rm`.
     *) with --global, rm GLOBAL_ADDONS_LOCATION/options.rm_addon
     *) with --uki-path/uki-title, rm /boot/efi/EFI/Linux/uki_name.efi.extra.d/options.rm_addon
     """
@@ -311,7 +307,7 @@ def list_addons_path(options):
 def show_installed_addons(cfg, options):
     """
     list all addons installed
-    *) with no params, lisft all addons in GLOBAL_ADDONS_LOCATION and all *installed* UKIs.
+    *) with no params, list all addons in GLOBAL_ADDONS_LOCATION and all *installed* UKIs.
     *) with --global, show only the global addons. If GLOBAL_ADDONS_LOCATION does not exist, fail
     *) with --uki-path/uki-title, show all addons used by a specific UKI
     *) with --verbose, print all addon sections
@@ -354,11 +350,14 @@ def main():
                        help = 'update addon FILE', metavar = 'FILE')
     group.add_argument('--remove-addon', dest = 'rm_addon', type = str,
                        help = 'remove addon FILE', metavar = 'FILE')
-    group.add_argument('--list-addons', dest = 'list_addons', type = str, nargs='?',
-                       const = True, help = 'list all addons in PATH', metavar = 'PATH')
+    group.add_argument('--list-local-addons', dest = 'list_addons', type = str, nargs='?',
+                       const = True,
+                       help = 'list all addons in PATH (leave it empty to show addons'
+                              ' installed in root fs)',
+                       metavar = 'PATH')
     parser.add_argument('--show-installed', dest = 'show',
                         action = 'store_true', default = False,
-                        help = 'list all installed addons')
+                        help = 'show all installed addons in the ESP')
 
     group = parser.add_argument_group('options for UKI addons updates')
     group.add_argument('--global', dest = 'global_addon',
