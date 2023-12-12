@@ -19,7 +19,8 @@ from virt.firmware.bootcfg import bootcfg
 from virt.firmware.bootcfg import linuxcfg
 
 ESP_PATH = linuxcfg.LinuxOsInfo().esp_path()
-DEFAULT_RPM_LOCATION = '/usr/lib/kernel/addons/'
+DEFAULT_RPM_LOCATION = '/usr/lib/linux/'
+DEFAULT_RPM_GLOBAL_LOCATION = DEFAULT_RPM_LOCATION + 'extra.d/'
 GLOBAL_ADDONS_LOCATION = ESP_PATH + '/loader/addons/'
 UKIFY_PATH = '/usr/lib/systemd/ukify'
 
@@ -260,6 +261,10 @@ def update_uki_addon(cfg, options):
 
 def print_addons_folder(path, options):
     found = 0
+    if not os.path.exists(path):
+        logging.error('%s does not exist!', path)
+        return -1
+
     for addon in os.listdir(path):
         if not addon.endswith('.addon.efi'):
             continue
@@ -292,16 +297,33 @@ def show_all_addons(destination, options, global_addons=True):
 def list_addons_path(options):
     """
     list all addons in a folder
-    *) with no params, look into DEFAULT_RPM_LOCATION
+    *) with no params, look into DEFAULT_RPM_GLOBAL_LOCATION and
+       DEFAULT_RPM_LOCATION/*/*.efi.extra.d/
     *) with --verbose, print all addon sections
     """
     #options.list_addons is False if undefined, is True if defined without
     # folder and a string if the folder is provided
     destination = options.list_addons
     if options.list_addons is True:
-        # no option provided, look in DEFAULT_RPM_LOCATION
-        destination = DEFAULT_RPM_LOCATION
-    show_all_addons(destination, options, global_addons=False)
+        # look in DEFAULT_RPM_GLOBAL_LOCATION
+        show_all_addons(DEFAULT_RPM_GLOBAL_LOCATION, options, global_addons=False)
+        # look into DEFAULT_RPM_LOCATION/<uname -r>/<uki>.efi.extra.d
+        if not os.path.exists(DEFAULT_RPM_LOCATION):
+            logging.error('%s does not exist!', DEFAULT_RPM_LOCATION)
+            return
+        found = 0
+        for kernel in os.listdir(DEFAULT_RPM_LOCATION):
+            kernel_path = DEFAULT_RPM_LOCATION + kernel
+            for uki in os.listdir(kernel_path):
+                if not uki.endswith('.efi.extra.d'):
+                    continue
+                found += 1
+                uki_path = kernel_path + '/' + uki
+                show_all_addons(uki_path, options, global_addons=False)
+        if found == 0:
+            print(f'No UKI addons found in {DEFAULT_RPM_LOCATION}*/*.efi.extra.d/')
+    else:
+        show_all_addons(destination, options, global_addons=False)
 
 
 def show_installed_addons(cfg, options):
