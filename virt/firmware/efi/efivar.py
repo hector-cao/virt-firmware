@@ -130,7 +130,8 @@ boot_defaults = {
     'guid' : guids.EfiGlobalVariable,
 }
 
-sigdb_names = ("PK", "KEK", "db", "dbx", "MokList", "MokListX", "TlsCaCertificate")
+sigdb_names = ("PK", "KEK", "db", "dbx", "MokList", "MokListX", "TlsCaCertificate",
+               "MokListRT", "MokListXRT")
 bool_names  = ('SecureBootEnable', 'CustomMode')
 ascii_names = ('Lang', 'PlatformLang', 'SbatLevel')
 blist_names = ('BootOrder', 'BootNext')
