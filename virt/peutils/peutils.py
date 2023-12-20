@@ -52,7 +52,7 @@ def is_cert_issuer_in_sigdb(cert, variable):
         try:
             cert.verify_directly_issued_by(item.x509)
             return True
-        except:
+        except (ValueError, TypeError):
             pass
     return False
 
