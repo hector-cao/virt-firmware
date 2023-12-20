@@ -19,6 +19,8 @@ from cryptography.hazmat.primitives.serialization import pkcs7
 from virt.firmware.efi import guids
 from virt.firmware.efi import siglist
 
+from virt.firmware.varstore import linux
+
 def common_name(item):
     try:
         scn = item.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0]
@@ -33,6 +35,14 @@ def is_ca_cert(cert):
         bc = False
     if bc:
         return bc.value.ca
+    return False
+
+def is_cert_in_sigdb(cert, variable):
+    if variable is None:
+        return False
+    for item in variable.sigdb:
+        if item.x509 == cert:
+            return True
     return False
 
 def print_cert(cert, ii, verbose = False):
@@ -74,10 +84,14 @@ def print_sbat_entries(ii, name, data):
     for entry in entries:
         print(f'# {ii}   {entry}')
 
-def sig_type2(data, ii, extract = False, verbose = False):
+def sig_type2(data, ii, extract = False, verbose = False, varlist = None):
     certs = pkcs7.load_der_pkcs7_certificates(data)
     for cert in certs:
         print_cert(cert, ii, verbose)
+        if varlist:
+            for var in ('db', 'dbx', 'MokListRT', 'MokListXRT'):
+                if is_cert_in_sigdb(cert, varlist.get(var)):
+                    print(f'# {ii}      found in \'{var}\'')
 
         if extract:
             scn = common_name(cert.subject)
@@ -114,7 +128,8 @@ def pe_section_flags(sec):
         x = 'x'
     return r + w + x
 
-def pe_print_sigs(filename, pe, indent, extract, verbose):
+# pylint: disable=too-many-arguments
+def pe_print_sigs(filename, pe, indent, extract, verbose, varlist = None):
     i  = f'{"":{indent}s}'
     ii = f'{"":{indent+3}s}'
     sighdr = pe.OPTIONAL_HEADER.DATA_DIRECTORY[4]
@@ -136,11 +151,11 @@ def pe_print_sigs(filename, pe, indent, extract, verbose):
                     f.write(sigs [ pos : pos + slen ])
             if stype == 2:
                 sig_type2(sigs [ pos + 8 : pos + slen ],
-                          ii, extract, verbose)
+                          ii, extract, verbose, varlist)
             pos += slen
             pos = (pos + 7) & ~7 # align
 
-def zboot_binary(pe, indent, verbose):
+def zboot_binary(pe, indent, verbose, varlist = None):
     i = f'{"":{indent}s}'
     (mz, zimg, zoff, zsize, r1, r2, alg) = struct.unpack_from('<I4sIIII8s', pe.get_data())
     if zimg != b'zimg':
@@ -159,13 +174,13 @@ def zboot_binary(pe, indent, verbose):
     try:
         npe = pefile.PE(data = data)
         for nsec in npe.sections:
-            pe_print_section(npe, nsec, indent + 6, verbose)
-        pe_print_sigs(None, npe, indent + 6, False, verbose)
+            pe_print_section(npe, nsec, indent + 6, verbose, varlist)
+        pe_print_sigs(None, npe, indent + 6, False, verbose, varlist)
     except pefile.PEFormatError:
         print(f'# {i}      not a PE binary')
 
 # pylint: disable=too-many-branches
-def pe_print_section(pe, sec, indent, verbose):
+def pe_print_section(pe, sec, indent, verbose, varlist = None):
     i  = f'{"":{indent}s}'
     ii = f'{"":{indent+3}s}'
     if sec.Name.startswith(b'/'):
@@ -209,20 +224,20 @@ def pe_print_section(pe, sec, indent, verbose):
         try:
             npe = pefile.PE(data = sec.get_data())
             for nsec in npe.sections:
-                pe_print_section(npe, nsec, indent + 6, verbose)
-            zboot_binary(npe, indent + 6, verbose)
-            pe_print_sigs(None, npe, indent + 6, False, verbose)
+                pe_print_section(npe, nsec, indent + 6, verbose, varlist)
+            zboot_binary(npe, indent + 6, verbose, varlist)
+            pe_print_sigs(None, npe, indent + 6, False, verbose, varlist)
         except pefile.PEFormatError:
             print(f'# {ii}   not a PE binary')
 
-def efi_binary(filename, extract = False, verbose = False):
+def efi_binary(filename, extract = False, verbose = False, varlist = None):
     print(f'# file: {filename}')
     try:
         pe = pefile.PE(filename)
         for sec in pe.sections:
             pe_print_section(pe, sec, 3, verbose)
         zboot_binary(pe, 3, verbose)
-        pe_print_sigs(filename, pe, 3, extract, verbose)
+        pe_print_sigs(filename, pe, 3, extract, verbose, varlist)
     except pefile.PEFormatError:
         print('#    not a PE binary')
 
@@ -294,11 +309,19 @@ def pe_listsigs():
     parser.add_argument('-v', '--verbose', dest = 'verbose',
                         action = 'store_true', default = False,
                         help = 'print more certificate details')
+    parser.add_argument('--findcert', dest = 'findcert',
+                        action = 'store_true', default = False,
+                        help = 'print more certificate details')
     parser.add_argument("FILES", nargs='*',
                         help="List of PE files to dump")
     options = parser.parse_args()
+
+    varlist = None
+    if options.findcert:
+        varlist = linux.LinuxVarStore().get_varlist(volatile = True)
+
     for filename in options.FILES:
-        efi_binary(filename, options.extract, options.verbose)
+        efi_binary(filename, options.extract, options.verbose, varlist)
     return 0
 
 def pe_addsigs():
