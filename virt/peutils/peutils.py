@@ -45,6 +45,17 @@ def is_cert_in_sigdb(cert, variable):
             return True
     return False
 
+def is_cert_issuer_in_sigdb(cert, variable):
+    if variable is None:
+        return False
+    for item in variable.sigdb:
+        try:
+            cert.verify_directly_issued_by(item.x509)
+            return True
+        except:
+            pass
+    return False
+
 def print_cert(cert, ii, verbose = False):
     print(f'# {ii}   certificate')
     if verbose:
@@ -91,7 +102,9 @@ def sig_type2(data, ii, extract = False, verbose = False, varlist = None):
         if varlist:
             for var in ('db', 'dbx', 'MokListRT', 'MokListXRT'):
                 if is_cert_in_sigdb(cert, varlist.get(var)):
-                    print(f'# {ii}      found in \'{var}\'')
+                    print(f'# {ii}      certificate found in \'{var}\'')
+                elif is_cert_issuer_in_sigdb(cert, varlist.get(var)):
+                    print(f'# {ii}      cert issuer found in \'{var}\'')
 
         if extract:
             scn = common_name(cert.subject)
