@@ -28,22 +28,22 @@ def pe_check_variable(digest, siglist, name, variable):
 
 def pe_check(digest, siglist, varlist):
     if pe_check_variable(digest, siglist, 'dbx', varlist.get('dbx')):
-        print('#   FAIL (dbx)')
+        print('#   -> FAIL (dbx)')
         return
 
     if pe_check_variable(digest, siglist, 'MokListXRT', varlist.get('MokListXRT')):
-        print('#   FAIL (MokListXRT)')
+        print('#   -> FAIL (MokListXRT)')
         return
 
     if pe_check_variable(digest, siglist, 'db', varlist.get('db')):
-        print('#   PASS (db)')
+        print('#   -> PASS (db)')
         return
 
     if pe_check_variable(digest, siglist, 'MokListRT', varlist.get('MokListRT')):
-        print('#   PASS (MokListRT -> needs shim.efi)')
+        print('#   -> PASS (MokListRT, needs shim.efi)')
         return
 
-    print('#   FAIL (not found)')
+    print('#   -> FAIL (not found)')
     return
 
 def main():
@@ -73,12 +73,13 @@ def main():
 
         print(f'#   digest: {digest.hex()}')
 
-        # double-check hash (temporary)
+        # double-check hash calculation (temporary)
         rc = subprocess.run(['pesign', '-h', '-i', filename ],
                             stdout = subprocess.PIPE,
                             check = True)
         line = rc.stdout.decode().split()[0]
-        print(f'#   pesign: {line}')
+        if line != digest.hex():
+            logging.error('digest mismatch (pesign: %s)', line)
 
         if varlist:
             pe_check(digest, siglist, varlist)
