@@ -18,15 +18,9 @@ from cryptography.hazmat.primitives.serialization import pkcs7
 
 from virt.firmware.efi import guids
 from virt.firmware.efi import siglist
-
 from virt.firmware.varstore import linux
 
-def common_name(item):
-    try:
-        scn = item.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0]
-        return scn.value
-    except IndexError:
-        return 'no CN'
+from virt.peutils import pesign
 
 def is_ca_cert(cert):
     try:
@@ -41,19 +35,21 @@ def is_cert_in_sigdb(cert, variable):
     if variable is None:
         return False
     for item in variable.sigdb:
-        if item.x509 == cert:
-            return True
+        if item.x509:
+            if item.x509 == cert:
+                return True
     return False
 
 def is_cert_issuer_in_sigdb(cert, variable):
     if variable is None:
         return False
     for item in variable.sigdb:
-        try:
-            cert.verify_directly_issued_by(item.x509)
-            return True
-        except (ValueError, TypeError):
-            pass
+        if item.x509:
+            try:
+                cert.verify_directly_issued_by(item.x509)
+                return True
+            except (ValueError, TypeError):
+                pass
     return False
 
 def print_cert(cert, ii, verbose = False):
@@ -64,8 +60,8 @@ def print_cert(cert, ii, verbose = False):
         print(f'# {ii}      valid  : {cert.not_valid_before} -> {cert.not_valid_after}')
         print(f'# {ii}      CA     : {is_ca_cert(cert)}')
     else:
-        scn = common_name(cert.subject)
-        icn = common_name(cert.issuer)
+        scn = pesign.cert_common_name(cert.subject)
+        icn = pesign.cert_common_name(cert.issuer)
         print(f'# {ii}      subject CN: {scn}')
         print(f'# {ii}      issuer  CN: {icn}')
 
@@ -107,7 +103,7 @@ def sig_type2(data, ii, extract = False, verbose = False, varlist = None):
                     print(f'# {ii}      cert issuer found in \'{var}\'')
 
         if extract:
-            scn = common_name(cert.subject)
+            scn = pesign.cert_common_name(cert.subject)
             fn = "".join(x for x in scn if x.isalnum()) + '.pem'
             print(f'# {ii}      >>> {fn}')
             with open(fn, 'wb') as f:
