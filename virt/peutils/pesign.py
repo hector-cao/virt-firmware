@@ -33,6 +33,13 @@ def pe_type2_signatures(pe):
             pos = (pos + 7) & ~7 # align
     return siglist
 
+#
+# This does only check whenever one of the certificates in the pkcs7
+# signature is found in the given efi variable, either the certificate
+# itself or the issuer of the certificate.
+#
+# The pkcs7 signature itself is NOT verified.
+#
 def pe_check_cert(siglist, variable):
     if not variable:
         return None
