@@ -6,6 +6,7 @@
 """ authenticode support """
 import sys
 import hashlib
+import logging
 import argparse
 import subprocess
 
@@ -23,16 +24,19 @@ def pe_authenticode_hash(pe, method = 'sha256'):
     hdr_end = pe.OPTIONAL_HEADER.SizeOfHeaders
 
     # hash header, excluding checksum and security directory
-    print(f'#   {0:06x} -> {hdr_end:06x}  image header')
     h.update(blob [ 0 : csum_off ])
+    logging.debug('hash 0x%06x -> 0x%06x - header start -> csum', 0, csum_off)
     if pe.OPTIONAL_HEADER.NumberOfRvaAndSizes < 4:
         sec = None
         h.update(blob [ csum_off + 4 : hdr_end ])
+        logging.debug('hash 0x%06x -> 0x%06x - header csum -> end', csum_off + 4, hdr_end)
     else:
         sec = pe.OPTIONAL_HEADER.DATA_DIRECTORY[4]
         sec_off = sec.get_file_offset()
         h.update(blob [ csum_off + 4 : sec_off ])
         h.update(blob [ sec_off + 8 : hdr_end ])
+        logging.debug('hash 0x%06x -> 0x%06x - header csum -> sigs', csum_off + 4, sec_off)
+        logging.debug('hash 0x%06x -> 0x%06x - header sigs -> end', sec_off + 8, hdr_end)
 
     # hash sections
     offset = hdr_end
@@ -40,9 +44,10 @@ def pe_authenticode_hash(pe, method = 'sha256'):
         start = section.PointerToRawData
         end = start + section.SizeOfRawData
         name = section.Name.rstrip(b'\0').decode()
-        print(f'#   {start:06x} -> {end:06x}  section {name}')
+        logging.debug('hash 0x%06x -> 0x%06x - section \'%s\'', start, end, name)
         if start != offset:
-            print('#     -*- unexpected section start -*-')
+            logging.error('unexpected section start 0x%06x (expected 0x%06x, section \'%s\')',
+                          start, offset, name)
         h.update(blob [ start : end ])
         offset = end
 
@@ -51,22 +56,23 @@ def pe_authenticode_hash(pe, method = 'sha256'):
         end = sec.VirtualAddress
     else:
         end = len(blob)
-    print(f'#   {offset:06x} -> {end:06x}  remaining data')
-    h.update(blob [ offset : end ])
+    if offset < end:
+        h.update(blob [ offset : end ])
+        logging.debug('hash 0x%06x -> 0x%06x - remaining data', offset, end)
 
     # hash dword padding
     padding = ((end + 3) & ~3) - end
     if padding:
-        print(f'#   +{padding}                padding')
         for i in range(padding):
             h.update(b'\0')
+        logging.debug('hash %d padding byte(s)', padding)
 
     # log signatures and EOF
     if sec and sec.Size:
         start = sec.VirtualAddress
         end = start + sec.Size
-        print(f'#   {start:06x} -> {end:06x}  (signatures)')
-    print(f'#   {len(blob):06x}            (end of file)')
+        logging.debug('sigs 0x%06x -> 0x%06x', start, end)
+    logging.debug('EOF  0x%06x', len(blob))
 
     return h.digest()
 
@@ -103,12 +109,17 @@ def pe_check(digest, siglist, varlist):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-l', '--loglevel', dest = 'loglevel', type = str, default = 'info',
+                        help = 'set loglevel to LEVEL', metavar = 'LEVEL')
     parser.add_argument('--findcert', dest = 'findcert',
                         action = 'store_true', default = False,
                         help = 'print more certificate details')
     parser.add_argument("FILES", nargs='*',
                         help="List of PE files to dump")
     options = parser.parse_args()
+
+    logging.basicConfig(format = '%(levelname)s: %(message)s',
+                        level = getattr(logging, options.loglevel.upper()))
 
     varlist = None
     if options.findcert:
