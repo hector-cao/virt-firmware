@@ -37,6 +37,10 @@ DISTRO_CA = {
     'rhel' : [
         resource_filename('virt.firmware', 'certs/RedHatSecureBootCA5.pem'),
         resource_filename('virt.firmware', 'certs/RedHatSecureBootCA6.pem'),
+        resource_filename('virt.firmware', 'certs/RedHatSecureBootCA8.pem'),
+    ],
+    'rhel-uefi' : [
+        resource_filename('virt.firmware', 'certs/RedHatUEFICA2023.pem'),
     ],
     'fedora' : [
         resource_filename('virt.firmware', 'certs/fedoraca-20200709.pem'),
