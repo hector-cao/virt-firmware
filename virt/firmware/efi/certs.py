@@ -30,16 +30,22 @@ DISTRO_CA = {
     'windows' : [
         MS_WIN,
     ],
-    'rhel' : [
+    'rhel-2014' : [
+        # obsoleted by 2020 signing key change
         resource_filename('virt.firmware', 'certs/RedHatSecureBootCA3.pem'),
+    ],
+    'rhel' : [
         resource_filename('virt.firmware', 'certs/RedHatSecureBootCA5.pem'),
         resource_filename('virt.firmware', 'certs/RedHatSecureBootCA6.pem'),
     ],
     'fedora' : [
         resource_filename('virt.firmware', 'certs/fedoraca-20200709.pem'),
     ],
-    'centos' : [
+    'centos-2018' : [
+        # obsoleted by 2020 signing key change
         resource_filename('virt.firmware', 'certs/CentOSSecureBootCAkey1.pem'),
+    ],
+    'centos' : [
         resource_filename('virt.firmware', 'certs/CentOSSecureBootCA2.pem'),
     ],
 }
