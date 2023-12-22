@@ -318,9 +318,9 @@ def pe_listsigs():
     parser.add_argument('-v', '--verbose', dest = 'verbose',
                         action = 'store_true', default = False,
                         help = 'print more certificate details')
-    parser.add_argument('--findcert', dest = 'findcert',
+    parser.add_argument('--findcert', '--find-cert', dest = 'findcert',
                         action = 'store_true', default = False,
-                        help = 'print more certificate details')
+                        help = 'check EFI databases for certs')
     parser.add_argument("FILES", nargs='*',
                         help="List of PE files to dump")
     options = parser.parse_args()
