@@ -19,11 +19,12 @@ def pe_check_variable(digest, siglist, name, variable):
     found = False
     cert = pesign.pe_check_cert(siglist, variable)
     if cert:
-        print(f'#   \'{pesign.cert_common_name(cert.subject)}\' cert or issuer found in \'{name}\'')
         found = True
+        scn = pesign.cert_common_name(cert.subject)
+        print(f'#   \'{scn}\' cert or issuer found in \'{name}\'')
     if pesign.pe_check_hash(digest, variable):
-        print(f'#   hash digest found in \'{name}\'')
         found = True
+        print(f'#   hash digest found in \'{name}\'')
     return found
 
 def pe_check(digest, siglist, varlist):
