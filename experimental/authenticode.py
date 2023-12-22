@@ -19,10 +19,10 @@ def pe_check_variable(digest, siglist, name, variable):
     found = False
     cert = pesign.pe_check_cert(siglist, variable)
     if cert:
-        print(f'#   cert in \'{name}\' ({pesign.cert_common_name(cert.subject)})')
+        print(f'#   \'{pesign.cert_common_name(cert.subject)}\' cert or issuer found in \'{name}\'')
         found = True
     if pesign.pe_check_hash(digest, variable):
-        print(f'#   hash in \'{name}\'')
+        print(f'#   hash digest found in \'{name}\'')
         found = True
     return found
 
@@ -50,9 +50,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', '--loglevel', dest = 'loglevel', type = str, default = 'info',
                         help = 'set loglevel to LEVEL', metavar = 'LEVEL')
-    parser.add_argument('--findcert', dest = 'findcert',
+    parser.add_argument('--findcert', '--find-cert', dest = 'findcert',
                         action = 'store_true', default = False,
-                        help = 'print more certificate details')
+                        help = 'check EFI databases for certs')
     parser.add_argument("FILES", nargs='*',
                         help="List of PE files to dump")
     options = parser.parse_args()
