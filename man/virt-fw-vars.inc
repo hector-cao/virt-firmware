@@ -9,7 +9,7 @@ aws.
 .TP
 Print variable store.
 virt-fw-vars --input ${guest}_VARS.fd \\
-             --print --vwerbose
+             --print --verbose
 
 .TP
 Enroll default (microsoft) secure boot certificates
