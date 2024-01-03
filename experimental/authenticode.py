@@ -54,6 +54,9 @@ def main():
     parser.add_argument('--findcert', '--find-cert', dest = 'findcert',
                         action = 'store_true', default = False,
                         help = 'check EFI databases for certs')
+    parser.add_argument('--x-pesign', dest = 'pesign',
+                        action = 'store_true', default = False,
+                        help = 'double-check hash calculation (using pesign)')
     parser.add_argument("FILES", nargs='*',
                         help="List of PE files to dump")
     options = parser.parse_args()
@@ -74,13 +77,14 @@ def main():
 
         print(f'#   digest: {digest.hex()}')
 
-        # double-check hash calculation (temporary)
-        rc = subprocess.run(['pesign', '-h', '-i', filename ],
-                            stdout = subprocess.PIPE,
-                            check = True)
-        line = rc.stdout.decode().split()[0]
-        if line != digest.hex():
-            logging.error('digest mismatch (pesign: %s)', line)
+        if options.pesign:
+            # double-check hash calculation (temporary)
+            rc = subprocess.run(['pesign', '-h', '-i', filename ],
+                                stdout = subprocess.PIPE,
+                                check = True)
+            line = rc.stdout.decode().split()[0]
+            if line != digest.hex():
+                logging.error('digest mismatch (pesign: %s)', line)
 
         if varlist:
             pe_check(digest, siglist, varlist)
