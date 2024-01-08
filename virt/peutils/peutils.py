@@ -326,7 +326,9 @@ def pe_listsigs():
     crypt_ver = pkg_resources.get_distribution('cryptography').version
     crypt_maj = int(crypt_ver.split('.')[0])
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description = 'Print informations about PE/EFI binaries.')
+
     parser.add_argument('-x', '--extract', dest = 'extract',
                         action = 'store_true', default = False,
                         help = 'also extract signatures and certificates')
