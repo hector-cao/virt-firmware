@@ -10,6 +10,7 @@ import argparse
 import subprocess
 
 import pefile
+import pkg_resources
 
 from virt.firmware.varstore import linux
 
@@ -48,12 +49,16 @@ def pe_check(digest, siglist, varlist):
     return
 
 def main():
+    crypt_ver = pkg_resources.get_distribution('cryptography').version
+    crypt_maj = int(crypt_ver.split('.')[0])
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-l', '--loglevel', dest = 'loglevel', type = str, default = 'info',
                         help = 'set loglevel to LEVEL', metavar = 'LEVEL')
-    parser.add_argument('--findcert', '--find-cert', dest = 'findcert',
-                        action = 'store_true', default = False,
-                        help = 'check EFI databases for certs')
+    if crypt_maj >= 40:
+        parser.add_argument('--findcert', '--find-cert', dest = 'findcert',
+                            action = 'store_true', default = False,
+                            help = 'check EFI databases for certs')
     parser.add_argument('--x-pesign', dest = 'pesign',
                         action = 'store_true', default = False,
                         help = 'double-check hash calculation (using pesign)')

@@ -10,6 +10,7 @@ import struct
 import argparse
 
 import pefile
+import pkg_resources
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -322,6 +323,9 @@ def pe_dumpinfo():
     return 0
 
 def pe_listsigs():
+    crypt_ver = pkg_resources.get_distribution('cryptography').version
+    crypt_maj = int(crypt_ver.split('.')[0])
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-x', '--extract', dest = 'extract',
                         action = 'store_true', default = False,
@@ -329,9 +333,10 @@ def pe_listsigs():
     parser.add_argument('-v', '--verbose', dest = 'verbose',
                         action = 'store_true', default = False,
                         help = 'print more certificate details')
-    parser.add_argument('--findcert', '--find-cert', dest = 'findcert',
-                        action = 'store_true', default = False,
-                        help = 'check EFI databases for certs')
+    if crypt_maj >= 40:
+        parser.add_argument('--findcert', '--find-cert', dest = 'findcert',
+                            action = 'store_true', default = False,
+                            help = 'check EFI databases for certs')
     parser.add_argument("FILES", nargs='*',
                         help="List of PE files to dump")
     options = parser.parse_args()
