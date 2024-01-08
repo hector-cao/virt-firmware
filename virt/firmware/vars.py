@@ -24,7 +24,9 @@ from virt.firmware.varstore import autodetect
 
 # pylint: disable=too-many-branches,too-many-statements
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description = "Print and modify EFI variable stores.")
+
     parser.add_argument('-l', '--loglevel', dest = 'loglevel', type = str, default = 'info',
                         help = 'set loglevel to LEVEL', metavar = 'LEVEL')
     parser.add_argument('-i', '--input', dest = 'input', type = str,

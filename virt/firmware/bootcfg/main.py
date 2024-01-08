@@ -165,7 +165,7 @@ def remove_entry(cfg, options):
 # pylint: disable=too-many-boolean-expressions,too-many-branches,too-many-statements
 def main():
     parser = argparse.ArgumentParser(
-        description = 'show and manage uefi boot entries')
+        description = 'Show and manage uefi boot entries.')
 
     parser.add_argument('-l', '--loglevel', dest = 'loglevel', type = str, default = 'info',
                         help = 'set loglevel to LEVEL', metavar = 'LEVEL')

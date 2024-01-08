@@ -655,7 +655,9 @@ def walk_tree(item, pfunc, indent = 0):
             walk_tree(i, pfunc, indent + inc)
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(
+        description = "Dump EFI firmware volumes and EFI variable stores.")
+
     parser.add_argument('-i', '--input', dest = 'input',
                         action = 'append', type = str,
                         help = 'dump firmware volume FILE', metavar = 'FILE')
