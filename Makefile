@@ -17,6 +17,7 @@ MANPAGES	+= man/virt-fw-vars.1
 MANPAGES	+= man/virt-fw-sigdb.1
 MANPAGES	+= man/kernel-bootcfg.1
 MANPAGES	+= man/uefi-boot-menu.1
+MANPAGES	+= man/pe-inspect.1
 
 default:
 	@echo "targets: lint install uninstall clean"
@@ -51,6 +52,7 @@ man/virt-fw-vars.1:  setup.cfg virt/firmware/vars.py man/virt-fw-vars.inc
 man/virt-fw-sigdb.1: setup.cfg virt/firmware/sigdb.py man/virt-fw-sigdb.inc
 man/kernel-bootcfg.1: setup.cfg virt/firmware/sigdb.py man/kernel-bootcfg.inc
 man/uefi-boot-menu.1: setup.cfg virt/firmware/sigdb.py man/uefi-boot-menu.inc
+man/pe-inspect.1: setup.cfg virt/peutils/peutils.py man/pe-inspect.inc
 
 
 install:
