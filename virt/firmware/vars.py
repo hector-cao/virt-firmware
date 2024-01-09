@@ -13,6 +13,7 @@ from virt.firmware.efi import efivar
 from virt.firmware.efi import efijson
 from virt.firmware.efi import devpath
 from virt.firmware.efi import ucs16
+from virt.firmware.efi import certs
 
 from virt.firmware.varstore import aws
 from virt.firmware.varstore import jstore
@@ -120,6 +121,9 @@ def main():
                         help = 'do not add microsoft keys')
     pgroup.add_argument('--distro-keys', dest = 'distro', type = str, action = 'append',
                         help = 'add ca keys for DISTRO', metavar = 'DISTRO')
+    pgroup.add_argument('--distro-list', dest = 'distrolist',
+                        action = 'store_true', default = False,
+                        help = 'list known distros')
     pgroup.add_argument('--sb', '--secure-boot', dest = 'secureboot',
                         action = 'store_true', default = False,
                         help = 'enable secure boot mode')
@@ -150,6 +154,10 @@ def main():
 
     varstore = None
     varlist = efivar.EfiVarList()
+
+    if options.distrolist:
+        certs.list_distros()
+        sys.exit(0)
 
     if options.inplace:
         if options.input:

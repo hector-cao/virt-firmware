@@ -27,31 +27,55 @@ MS_3RD = resource_filename('virt.firmware', 'certs/MicrosoftCorporationUEFICA201
 
 # linux distro ca keys
 DISTRO_CA = {
-    'windows' : [
-        MS_WIN,
+    'windows' : {
+        'desc'  : 'Microsoft Windows',
+        'certs' : [
+            MS_WIN,
+        ],
+    },
+    'rhel-2014' : {
+        'desc'  : 'Red Hat Enterprise Linux (obsoleted by 2020 signing key rotation)',
+        'certs' : [
+            resource_filename('virt.firmware', 'certs/RedHatSecureBootCA3.pem'),
+        ],
+    },
+    'rhel' : {
+        'desc'  : 'Red Hat Enterprise Linux',
+        'certs' : [
+            resource_filename('virt.firmware', 'certs/RedHatSecureBootCA5.pem'),
+            resource_filename('virt.firmware', 'certs/RedHatSecureBootCA8.pem'),
     ],
-    'rhel-2014' : [
-        # obsoleted by 2020 signing key change
-        resource_filename('virt.firmware', 'certs/RedHatSecureBootCA3.pem'),
-    ],
-    'rhel' : [
-        resource_filename('virt.firmware', 'certs/RedHatSecureBootCA5.pem'),
-        resource_filename('virt.firmware', 'certs/RedHatSecureBootCA8.pem'),
-    ],
-    'rhel-uefi' : [
-        resource_filename('virt.firmware', 'certs/RedHatUEFICA2023.pem'),
-    ],
-    'fedora' : [
-        resource_filename('virt.firmware', 'certs/fedoraca-20200709.pem'),
-    ],
-    'centos-2018' : [
-        # obsoleted by 2020 signing key change
-        resource_filename('virt.firmware', 'certs/CentOSSecureBootCAkey1.pem'),
-    ],
-    'centos' : [
-        resource_filename('virt.firmware', 'certs/CentOSSecureBootCA2.pem'),
-    ],
+    },
+    'rh-uefi' : {
+        'desc'  : 'Red Hat UEFI CA',
+        'certs' : [
+            resource_filename('virt.firmware', 'certs/RedHatUEFICA2023.pem'),
+        ],
+    },
+    'fedora' : {
+        'desc'  : 'Fedora Linux',
+        'certs' : [
+            resource_filename('virt.firmware', 'certs/fedoraca-20200709.pem'),
+        ],
+    },
+    'centos-2018' : {
+        'desc'  : 'CentOS Stream (obsoleted by 2020 signing key rotation)',
+        'certs' : [
+            resource_filename('virt.firmware', 'certs/CentOSSecureBootCAkey1.pem'),
+        ],
+    },
+    'centos' : {
+        'desc'  : 'CentOS Stream',
+        'certs' : [
+            resource_filename('virt.firmware', 'certs/CentOSSecureBootCA2.pem'),
+        ],
+    },
 }
+
+def list_distros():
+    print('known distro certs:')
+    for (key, val) in DISTRO_CA.items():
+        print(f'  {key:12s} - {val["desc"]}')
 
 def pk_generate(cn = 'random secure boot platform',
                 org = None, city = None, state = None, country = None):

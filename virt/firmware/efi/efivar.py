@@ -469,7 +469,7 @@ class EfiVarList(collections.UserDict):
         self.add_cert('db', guids.MicrosoftVendor, certs.MS_3RD, False)
 
     def add_distro_keys(self, distro):
-        certlist = certs.DISTRO_CA.get(distro)
+        certlist = certs.DISTRO_CA.get(distro).get('certs')
         if not certlist:
             l = ', '.join(certs.DISTRO_CA.keys())
             raise RuntimeError(f'unknown distro: {distro} (valid: {l})')
