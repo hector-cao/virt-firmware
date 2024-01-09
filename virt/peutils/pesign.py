@@ -8,10 +8,15 @@ import struct
 import hashlib
 import logging
 
+import pkg_resources
+
 from cryptography import x509
 from cryptography.hazmat.primitives.serialization import pkcs7
 
 from virt.firmware.efi import guids
+
+cryptography_version = pkg_resources.get_distribution('cryptography').version
+cryptography_major = int(cryptography_version.split('.')[0])
 
 def cert_common_name(cert):
     try:
@@ -94,6 +99,27 @@ def pe_type2_signatures(pe):
             pos += slen
             pos = (pos + 7) & ~7 # align
     return siglist
+
+def is_cert_in_sigdb(cert, variable):
+    if variable is None:
+        return False
+    for item in variable.sigdb:
+        if item.x509:
+            if item.x509 == cert:
+                return True
+    return False
+
+def is_cert_issuer_in_sigdb(cert, variable):
+    if variable is None:
+        return False
+    for item in variable.sigdb:
+        if item.x509:
+            try:
+                cert.verify_directly_issued_by(item.x509)
+                return True
+            except (ValueError, TypeError):
+                pass
+    return False
 
 #
 # This does only check whenever one of the certificates in the pkcs7

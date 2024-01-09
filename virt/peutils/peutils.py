@@ -10,7 +10,6 @@ import struct
 import argparse
 
 import pefile
-import pkg_resources
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
@@ -30,27 +29,6 @@ def is_ca_cert(cert):
         bc = False
     if bc:
         return bc.value.ca
-    return False
-
-def is_cert_in_sigdb(cert, variable):
-    if variable is None:
-        return False
-    for item in variable.sigdb:
-        if item.x509:
-            if item.x509 == cert:
-                return True
-    return False
-
-def is_cert_issuer_in_sigdb(cert, variable):
-    if variable is None:
-        return False
-    for item in variable.sigdb:
-        if item.x509:
-            try:
-                cert.verify_directly_issued_by(item.x509)
-                return True
-            except (ValueError, TypeError):
-                pass
     return False
 
 def print_cert(cert, ii, verbose = False):
@@ -98,9 +76,9 @@ def sig_type2(data, ii, extract = False, verbose = False, varlist = None):
         print_cert(cert, ii, verbose)
         if varlist:
             for var in ('db', 'dbx', 'MokListRT', 'MokListXRT'):
-                if is_cert_in_sigdb(cert, varlist.get(var)):
+                if pesign.is_cert_in_sigdb(cert, varlist.get(var)):
                     print(f'# {ii}      certificate found in \'{var}\'')
-                elif is_cert_issuer_in_sigdb(cert, varlist.get(var)):
+                elif pesign.is_cert_issuer_in_sigdb(cert, varlist.get(var)):
                     print(f'# {ii}      cert issuer found in \'{var}\'')
 
         if extract:
@@ -323,9 +301,6 @@ def pe_dumpinfo():
     return 0
 
 def pe_listsigs():
-    crypt_ver = pkg_resources.get_distribution('cryptography').version
-    crypt_maj = int(crypt_ver.split('.')[0])
-
     parser = argparse.ArgumentParser(
         description = 'Print informations about PE/EFI binaries.')
 
@@ -335,7 +310,7 @@ def pe_listsigs():
     parser.add_argument('-v', '--verbose', dest = 'verbose',
                         action = 'store_true', default = False,
                         help = 'print more certificate details')
-    if crypt_maj >= 40:
+    if pesign.cryptography_major >= 40:
         parser.add_argument('--findcert', '--find-cert', dest = 'findcert',
                             action = 'store_true', default = False,
                             help = 'check EFI databases for certs')
