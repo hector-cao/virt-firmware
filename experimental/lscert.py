@@ -53,9 +53,9 @@ def ls_files(flist, verbose, basename = False):
             print(f'{pname:{plen}s}: {ys} - {ye}  {cn.value}')
 
 def ls_dirs(dlist, verbose):
-    for dir in dlist:
-        flist = glob.glob(f'{dir}/*')
-        if len(flist):
+    for item in dlist:
+        flist = glob.glob(f'{item}/*')
+        if len(flist) > 0:
             print(f'{dir}:')
             ls_files(flist, verbose, basename = True)
 
@@ -78,9 +78,9 @@ def main():
         elif os.path.isdir(item):
             dlist += (item,)
 
-    if len(flist):
+    if len(flist) > 0:
         ls_files(flist, options.verbose)
-    if len(dlist):
+    if len(dlist) > 0:
         ls_dirs(dlist, options.verbose)
 
 if __name__ == '__main__':
