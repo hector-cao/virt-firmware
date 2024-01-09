@@ -4,7 +4,9 @@
 # (c) 2023 Gerd Hoffmann
 #
 """ list certificates """
+import os
 import sys
+import glob
 import argparse
 
 from cryptography import x509
@@ -13,6 +15,49 @@ from cryptography.hazmat.backends import default_backend
 attr_override = {
     x509.NameOID.EMAIL_ADDRESS : 'email'
 }
+
+def ls_files(flist, verbose, basename = False):
+    plen = 0
+    for filename in flist:
+        pname = filename
+        if basename:
+            pname = '  ' + os.path.basename(pname)
+        if plen < len(pname):
+            plen = len(pname)
+
+    for filename in flist:
+        # read filename
+        with open(filename, 'rb') as f:
+            blob = f.read()
+        if b'-----BEGIN' in blob:
+            cert = x509.load_pem_x509_certificate(blob, default_backend())
+        else:
+            cert = x509.load_der_x509_certificate(blob, default_backend())
+
+        pname = filename
+        if basename:
+            pname = '  ' + os.path.basename(pname)
+
+        if verbose:
+            # verbose
+            name = cert.subject.rfc4514_string(attr_override)
+            ds = str(cert.not_valid_before).split()[0]
+            de = str(cert.not_valid_after).split()[0]
+            print(f'{pname:{plen}s}: {ds} - {de}  {name}')
+
+        else:
+            # compact
+            cn = cert.subject.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0]
+            ys = cert.not_valid_before.year
+            ye = cert.not_valid_after.year
+            print(f'{pname:{plen}s}: {ys} - {ye}  {cn.value}')
+
+def ls_dirs(dlist, verbose):
+    for dir in dlist:
+        flist = glob.glob(f'{dir}/*')
+        if len(flist):
+            print(f'{dir}:')
+            ls_files(flist, verbose, basename = True)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -24,34 +69,19 @@ def main():
                         help="List of PE files to dump")
     options = parser.parse_args()
 
-    flen = 0
-    for filename in options.FILES:
-        if flen < len(filename):
-            flen = len(filename)
+    flist = []
+    dlist = []
 
-    for filename in options.FILES:
-        # read filename
-        with open(filename, 'rb') as f:
-            blob = f.read()
-        if b'-----BEGIN' in blob:
-            cert = x509.load_pem_x509_certificate(blob, default_backend())
-        else:
-            cert = x509.load_der_x509_certificate(blob, default_backend())
+    for item in options.FILES:
+        if os.path.isfile(item):
+            flist += (item,)
+        elif os.path.isdir(item):
+            dlist += (item,)
 
-        if options.verbose:
-            # verbose
-            name = cert.subject.rfc4514_string(attr_override)
-            ds = str(cert.not_valid_before).split()[0]
-            de = str(cert.not_valid_after).split()[0]
-            print(f'{filename:{flen}s}: {ds} - {de}  {name}')
-
-        else:
-            # compact
-            cn = cert.subject.get_attributes_for_oid(x509.oid.NameOID.COMMON_NAME)[0]
-            ys = cert.not_valid_before.year
-            ye = cert.not_valid_after.year
-            print(f'{filename:{flen}s}: {ys} - {ye}  {cn.value}')
-
+    if len(flist):
+        ls_files(flist, options.verbose)
+    if len(dlist):
+        ls_dirs(dlist, options.verbose)
 
 if __name__ == '__main__':
     sys.exit(main())
