@@ -10,6 +10,10 @@ import argparse
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 
+attr_override = {
+    x509.NameOID.EMAIL_ADDRESS : 'email'
+}
+
 def main():
     parser = argparse.ArgumentParser(
         description = 'list certificates')
@@ -36,7 +40,7 @@ def main():
 
         if options.verbose:
             # verbose
-            name = cert.subject.rfc4514_string()
+            name = cert.subject.rfc4514_string(attr_override)
             ds = str(cert.not_valid_before).split()[0]
             de = str(cert.not_valid_after).split()[0]
             print(f'{filename:{flen}s}: {ds} - {de}  {name}')
