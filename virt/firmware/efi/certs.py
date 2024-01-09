@@ -97,6 +97,7 @@ def pk_generate(cn = 'random secure boot platform',
         attrs.append(x509.NameAttribute(x509.NameOID.COUNTRY_NAME, country))
 
     subject = issuer = x509.Name(attrs)
+    now = datetime.datetime.now(datetime.timezone.utc)
     cert = x509.CertificateBuilder().subject_name(
         subject
     ).issuer_name(
@@ -106,9 +107,9 @@ def pk_generate(cn = 'random secure boot platform',
     ).serial_number(
         x509.random_serial_number()
     ).not_valid_before(
-        datetime.datetime.utcnow()
+        now
     ).not_valid_after(
-        datetime.datetime.utcnow() + datetime.timedelta(days = 365 * 10)
+        now + datetime.timedelta(days = 365 * 10)
     ).add_extension(
         x509.BasicConstraints(ca = False, path_length = None),
         critical = False,
