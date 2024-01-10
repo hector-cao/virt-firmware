@@ -66,7 +66,7 @@ def main():
                         level = getattr(logging, options.loglevel.upper()))
 
     varlist = None
-    if options.findcert:
+    if pesign.cryptography_major >= 40 and options.findcert:
         varlist = linux.LinuxVarStore().get_varlist(volatile = True)
 
     for filename in options.FILES:
