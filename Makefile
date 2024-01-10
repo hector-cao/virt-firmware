@@ -61,7 +61,7 @@ install:
 uninstall:
 	python3 -m pip uninstall virt-firmware
 
-test check: test-dump test-vars test-sigdb test-pe test-unittest
+test check: test-dump test-vars test-sigdb test-pe test-bootcfg test-unittest
 
 test-dump:
 	tests/test-dump.sh
@@ -71,6 +71,9 @@ test-vars:
 
 test-pe:
 	tests/test-pe.sh
+
+test-bootcfg:
+	tests/test-bootcfg.sh
 
 test-sigdb:
 	tests/test-sigdb.sh

@@ -12,6 +12,7 @@ image: registry.fedoraproject.org/fedora:latest
   - make test-vars
   - make test-sigdb
   - make test-pe
+  - make test-bootcfg
   - make test-unittest
   - make manpages
 
