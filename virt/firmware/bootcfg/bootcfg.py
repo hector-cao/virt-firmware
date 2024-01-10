@@ -46,6 +46,8 @@ class EfiBootConfig:
             self.bentr[nr[0]] = None
 
     def add_unused_entries(self, names):
+        if not names:
+            return
         regex = re.compile('Boot([0-9A-Z]{4})')
         for name in names:
             result = regex.match(name)
