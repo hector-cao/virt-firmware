@@ -71,7 +71,7 @@ class LinuxEfiBootConfig(bootcfg.EfiBootConfig):
         self.bootcurrent = self.linux_read_variable('BootCurrent')
         self.bootnext = self.linux_read_variable('BootNext')
         self.parse_boot_variables()
-        self.add_unused_entries(self.varstore.scan[guids.EfiGlobalVariable])
+        self.add_unused_entries(self.varstore.scan.get(guids.EfiGlobalVariable))
         for nr in self.bentr.keys():
             var = self.linux_read_variable(f'Boot{nr:04X}')
             if var:
