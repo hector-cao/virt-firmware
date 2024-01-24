@@ -70,7 +70,7 @@ def pe_authenticode_hash(pe, method = 'sha256'):
         logging.debug('hash 0x%06x -> 0x%06x - remaining data', offset, end)
 
     # hash dword padding
-    padding = ((end + 3) & ~3) - end
+    padding = ((end + 7) & ~7) - end
     if padding:
         for i in range(padding):
             h.update(b'\0')
