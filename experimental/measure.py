@@ -129,8 +129,6 @@ def measure_var(banks, var, cfg):
 def measure_varlist_shim(banks, varlist):
     result = []
 
-    result.append(measure_sep(7, banks))
-
     var = varlist.get('SbatLevel')
     if var:
         result.append(measure_var(banks, var, False))
@@ -153,6 +151,8 @@ def measure_varlist(banks, varlist,
         var = varlist.get(name)
         if var:
             result.append(measure_var(banks, var, True))
+
+    result.append(measure_sep(7, banks))
 
     if shim:
         result += measure_varlist_shim(banks, varlist)
