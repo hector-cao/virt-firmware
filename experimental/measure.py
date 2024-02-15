@@ -84,6 +84,7 @@ def measure_sep(index, banks):
         'content_type' : 'pcclient_std',
         'content'      : {
             'event_type' : 'EV_SEPARATOR',
+            'event_data' : separator.hex(),
         }
     }
     return result
@@ -114,11 +115,7 @@ def measure_var(banks, var, cfg):
         'content_type' : 'pcclient_std',
         'content'      : {
             'event_type' : evttype,
-            # FIXME: convert tpm2_eventlog -> CEL-JSON
-            'VariableName'       : str(var.guid),
-            'UnicodeNameLength'  : namelen,
-            'VariableDataLength' : datalen,
-            'UnicodeName'        : str(var.name),
+            'event_data' : varlog.hex(),
         },
     }
     return result
@@ -193,9 +190,8 @@ def measure_volume(banks, name, vol):
         'content_type' : 'pcclient_std',
         'content'      : {
             'event_type' : 'EV_EFI_PLATFORM_FIRMWARE_BLOB',
-            # FIXME: convert tpm2_eventlog -> CEL-JSON
-            'VolumeName' : name,
-            'BlobLength' : vol.tlen,
+            'event_data' : (vol.base.to_bytes(length = 8, byteorder = 'little').hex() +
+                            vol.tlen.to_bytes(length = 8, byteorder = 'little').hex()),
         },
     }
     return result
@@ -209,8 +205,10 @@ def measure_image(banks, image, version = None):
     if (peifv or dxefv) and version:
         result.append(measure_version(banks, version))
     if peifv:
+        peifv.base = 0x820000
         result.append(measure_volume(banks, 'PEIFV', peifv))
     if dxefv:
+        dxefv.base = 0x900000
         result.append(measure_volume(banks, 'DXEFV', dxefv))
     if peifv or dxefv:
         result.append(measure_sep(0, banks))
