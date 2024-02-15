@@ -22,6 +22,7 @@ MS_KEK_2023 = resource_filename('virt.firmware', 'certs/MicrosoftCorporationKEK2
 
 # microsoft: used to sign windows
 MS_WIN_2011 = resource_filename('virt.firmware', 'certs/MicrosoftWindowsProductionPCA2011.pem')
+MS_WIN_2023 = resource_filename('virt.firmware', 'certs/WindowsUEFICA2023.pem')
 
 # microsoft: used to sign 3rd party binaries (shim.efi, drivers).
 MS_3RD_2011 = resource_filename('virt.firmware', 'certs/MicrosoftCorporationUEFICA2011.pem')
@@ -40,6 +41,7 @@ DISTRO_CA = {
         'desc'  : 'Microsoft Windows',
         'certs' : [
             MS_WIN_2011,
+            MS_WIN_2023,
         ],
     },
     'ms-uefi' : {

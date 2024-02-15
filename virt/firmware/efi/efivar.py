@@ -467,6 +467,7 @@ class EfiVarList(collections.UserDict):
 
     def add_microsoft_keys(self):
         self.add_cert('db', guids.MicrosoftVendor, certs.MS_WIN_2011, False)
+        self.add_cert('db', guids.MicrosoftVendor, certs.MS_WIN_2023, False)
         self.add_cert('db', guids.MicrosoftVendor, certs.MS_3RD_2011, False)
 
     def add_distro_keys(self, distro):
