@@ -61,6 +61,12 @@ def calculate_pcrs(banks, result):
             })
     return values
 
+def pcr_used(nr, result):
+    for evt in result:
+        if evt['pcr'] == nr:
+            return True
+    return False
+
 
 ########################################################################
 # measure misc
@@ -123,6 +129,8 @@ def measure_var(banks, var, cfg):
 def measure_varlist_shim(banks, varlist):
     result = []
 
+    result.append(measure_sep(7, banks))
+
     var = varlist.get('SbatLevel')
     if var:
         result.append(measure_var(banks, var, False))
@@ -145,8 +153,6 @@ def measure_varlist(banks, varlist,
         var = varlist.get(name)
         if var:
             result.append(measure_var(banks, var, True))
-
-    result.append(measure_sep(7, banks))
 
     if shim:
         result += measure_varlist_shim(banks, varlist)
@@ -210,8 +216,6 @@ def measure_image(banks, image, version = None):
     if dxefv:
         dxefv.base = 0x900000
         result.append(measure_volume(banks, 'DXEFV', dxefv))
-    if peifv or dxefv:
-        result.append(measure_sep(0, banks))
 
     if varfv:
         edk2store = edk2.Edk2VarStore(image.name)
@@ -234,6 +238,13 @@ def main():
     parser.add_option('--version', dest = 'version', type = 'string',
                       help = 'firmware version (PcdFirmwareVersionString)', metavar = 'VER')
 
+    parser.add_option('--pcrlock', dest = 'pcrlock',
+                      action = 'store_true', default = False,
+                      help = 'write event log in systemd-pcrlock format (default)')
+    parser.add_option('--digests', dest = 'digests',
+                      action = 'store_true', default = False,
+                      help = 'write expected pcr values')
+
     parser.add_option('--vars', dest = 'vars', type = 'string',
                       help = 'read edk2 vars from FILE', metavar = 'FILE')
     parser.add_option('--no-sb', '--no-secure-boot', dest = 'secureboot',
@@ -249,16 +260,20 @@ def main():
     parser.add_option('--bank', dest = 'banks',
                       action = 'append', type = 'string',
                       help = 'pick tpm2 banks (sha1, sha256, sha384, sha512),'
-                      ' specify multiple times to selecct more than one')
+                      ' specify multiple times to select more than one')
 
     (options, args) = parser.parse_args()
     logging.basicConfig(format = '%(levelname)s: %(message)s',
                         level = getattr(logging, options.loglevel.upper()))
-    eventlog = []
-
+    # defaults
     if not options.banks:
         options.banks = [ 'sha256', ]
 
+    if not options.pcrlock and not options.digests:
+        options.pcrlock = True
+
+    # generate event log
+    eventlog = []
     if options.image:
         with open(options.image, 'rb') as f:
             data = f.read()
@@ -283,10 +298,15 @@ def main():
                                    secureboot = options.secureboot,
                                    shim = options.shim)
 
-    result = {
-        'records' : eventlog,
-        'PCRs'    : calculate_pcrs(options.banks, eventlog),
-    }
+    # print results
+    result = {}
+    if options.pcrlock:
+        result['records'] = eventlog
+    elif options.digests:
+        if pcr_used(0, eventlog):
+            # add 500-separator.pcrlock
+            eventlog.append(measure_sep(0, options.banks))
+        result['values'] = calculate_pcrs(options.banks, eventlog)
     print(json.dumps(result, indent = 4))
 
     return 0
