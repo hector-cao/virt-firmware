@@ -17,13 +17,18 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 REDHAT_PK = resource_filename('virt.firmware', 'certs/RedHatSecureBootPKKEKkey1.pem')
 
 # microsoft: KEK key
-MS_KEK = resource_filename('virt.firmware', 'certs/MicrosoftCorporationKEKCA2011.pem')
+MS_KEK_2011 = resource_filename('virt.firmware', 'certs/MicrosoftCorporationKEKCA2011.pem')
 
 # microsoft: used to sign windows
-MS_WIN = resource_filename('virt.firmware', 'certs/MicrosoftWindowsProductionPCA2011.pem')
+MS_WIN_2011 = resource_filename('virt.firmware', 'certs/MicrosoftWindowsProductionPCA2011.pem')
 
 # microsoft: used to sign 3rd party binaries (shim.efi, drivers).
-MS_3RD = resource_filename('virt.firmware', 'certs/MicrosoftCorporationUEFICA2011.pem')
+MS_3RD_2011 = resource_filename('virt.firmware', 'certs/MicrosoftCorporationUEFICA2011.pem')
+
+# for backward compatibility
+MS_KEK = MS_KEK_2011
+MS_WIN = MS_WIN_2011
+MS_3RD = MS_3RD_2011
 
 # linux distro ca keys
 DISTRO_CA = {
@@ -33,13 +38,13 @@ DISTRO_CA = {
     'windows' : {
         'desc'  : 'Microsoft Windows',
         'certs' : [
-            MS_WIN,
+            MS_WIN_2011,
         ],
     },
     'ms-uefi' : {
         'desc'  : 'Microsoft UEFI CA',
         'certs' : [
-            MS_3RD,
+            MS_3RD_2011,
         ],
     },
 

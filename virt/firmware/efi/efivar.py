@@ -454,7 +454,7 @@ class EfiVarList(collections.UserDict):
                                   guid = guids.OvmfEnrollDefaultKeys):
         self.add_cert('PK', guid, cert, True)
         self.add_cert('KEK', guid, cert, True)
-        self.add_cert('KEK', guids.MicrosoftVendor, certs.MS_KEK, False)
+        self.add_cert('KEK', guids.MicrosoftVendor, certs.MS_KEK_2011, False)
         self.add_dummy_dbx(guids.OvmfEnrollDefaultKeys)
 
     def enroll_platform_redhat(self):
@@ -465,8 +465,8 @@ class EfiVarList(collections.UserDict):
         self.enroll_platform_with_cert(pk.name)
 
     def add_microsoft_keys(self):
-        self.add_cert('db', guids.MicrosoftVendor, certs.MS_WIN, False)
-        self.add_cert('db', guids.MicrosoftVendor, certs.MS_3RD, False)
+        self.add_cert('db', guids.MicrosoftVendor, certs.MS_WIN_2011, False)
+        self.add_cert('db', guids.MicrosoftVendor, certs.MS_3RD_2011, False)
 
     def add_distro_keys(self, distro):
         certlist = certs.DISTRO_CA.get(distro).get('certs')
