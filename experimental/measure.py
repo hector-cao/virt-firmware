@@ -41,24 +41,24 @@ class PCR:
 def calculate_pcrs(banks, result):
     pcrs = {}
     for item in result:
-        index = item['PCRIndex']
+        index = item['pcr']
         pcr = pcrs.get(index)
         if not pcr:
             pcr = PCR()
             pcrs[index] = pcr
-        for bank in banks:
-            pcr.extend_hash(bank, bytes.fromhex(item['Digests'][bank]))
+        for digest in item['digests']:
+            bank = digest['hashAlg']
+            pcr.extend_hash(bank, bytes.fromhex(digest['digest']))
 
     values = []
     for index in sorted(pcrs.keys()):
         pcr = pcrs.get(index)
-        item = {
-            'PCRIndex' : index,
-            'Values'   : {},
-        }
         for bank in banks:
-            item['Values'][bank] = pcr.value(bank).hex()
-        values.append(item)
+            values.append({
+                'pcr'     : index,
+                'hashAlg' : bank,
+                'digest'  : pcr.value(bank).hex()
+            })
     return values
 
 
@@ -66,19 +66,25 @@ def calculate_pcrs(banks, result):
 # measure misc
 
 def hash_digest(banks, hashdata):
-    result = {}
+    result = []
     for bank in banks:
         h = hashlib.new(bank)
         h.update(hashdata)
-        result[bank] = h.hexdigest()
+        result.append({
+            'hashAlg' : bank,
+            'digest'  : h.hexdigest()
+        })
     return result
 
 def measure_sep(index, banks):
     separator = bytes(4)
     result = {
-        'PCRIndex'   : index,
-        'EventType'  : 'EV_SEPARATOR',
-        'Digests'    : hash_digest(banks, separator),
+        'pcr'          : index,
+        'digests'      : hash_digest(banks, separator),
+        'content_type' : 'pcclient_std',
+        'content'      : {
+            'event_type' : 'EV_SEPARATOR',
+        }
     }
     return result
 
@@ -102,12 +108,13 @@ def measure_var(banks, var, cfg):
     else:
         evttype = 'EV_EFI_VARIABLE_AUTHORITY'
 
-    # modeled after tpm2_eventlog output
     result = {
-        'PCRIndex'  : 7,
-        'EventType' : evttype,
-        'Digests'   : hash_digest(banks, varlog),
-        'Event'     : {
+        'pcr'          : 7,
+        'digests'      : hash_digest(banks, varlog),
+        'content_type' : 'pcclient_std',
+        'content'      : {
+            'event_type' : evttype,
+            # FIXME: convert tpm2_eventlog -> CEL-JSON
             'VariableName'       : str(var.guid),
             'UnicodeNameLength'  : namelen,
             'VariableDataLength' : datalen,
@@ -156,10 +163,13 @@ def measure_varlist(banks, varlist,
 def measure_version(banks, version):
     ustr = ucs16.from_string(version)
     result = {
-        'PCRIndex'   : 0,
-        'EventType'  : 'EV_S_CRTM_VERSION',
-        'Digests'    : hash_digest(banks, bytes(ustr)),
-        'Event'      : bytes(ustr).hex(),
+        'pcr'          : 0,
+        'digests'      : hash_digest(banks, bytes(ustr)),
+        'content_type' : 'pcclient_std',
+        'content'      : {
+            'event_type' : 'EV_S_CRTM_VERSION',
+            'event_data' : bytes(ustr).hex(),
+        },
     }
     return result
 
@@ -177,14 +187,15 @@ def find_volume(item, nameguid = None, typeguid = None):
     return None
 
 def measure_volume(banks, name, vol):
-    # modeled after tpm2_eventlog output
     result = {
-        'PCRIndex'   : 0,
-        'EventType'  : 'EV_EFI_PLATFORM_FIRMWARE_BLOB',
-        'VolumeName' : name,
-        'Digests'    : hash_digest(banks, vol.blob),
-        'Event' : {
-            'BlobLength': vol.tlen,
+        'pcr'          : 0,
+        'digests'      : hash_digest(banks, vol.blob),
+        'content_type' : 'pcclient_std',
+        'content'      : {
+            'event_type' : 'EV_EFI_PLATFORM_FIRMWARE_BLOB',
+            # FIXME: convert tpm2_eventlog -> CEL-JSON
+            'VolumeName' : name,
+            'BlobLength' : vol.tlen,
         },
     }
     return result
@@ -275,8 +286,8 @@ def main():
                                    shim = options.shim)
 
     result = {
-        'EventLog' : eventlog,
-        'PCRs'     : calculate_pcrs(options.banks, eventlog),
+        'records' : eventlog,
+        'PCRs'    : calculate_pcrs(options.banks, eventlog),
     }
     print(json.dumps(result, indent = 4))
 
