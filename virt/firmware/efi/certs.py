@@ -18,6 +18,7 @@ REDHAT_PK = resource_filename('virt.firmware', 'certs/RedHatSecureBootPKKEKkey1.
 
 # microsoft: KEK key
 MS_KEK_2011 = resource_filename('virt.firmware', 'certs/MicrosoftCorporationKEKCA2011.pem')
+MS_KEK_2023 = resource_filename('virt.firmware', 'certs/MicrosoftCorporationKEK2KCA2023.pem')
 
 # microsoft: used to sign windows
 MS_WIN_2011 = resource_filename('virt.firmware', 'certs/MicrosoftWindowsProductionPCA2011.pem')
