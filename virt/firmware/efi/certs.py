@@ -27,12 +27,25 @@ MS_3RD = resource_filename('virt.firmware', 'certs/MicrosoftCorporationUEFICA201
 
 # linux distro ca keys
 DISTRO_CA = {
+    #
+    # microsoft keys
+    #
     'windows' : {
         'desc'  : 'Microsoft Windows',
         'certs' : [
             MS_WIN,
         ],
     },
+    'ms-uefi' : {
+        'desc'  : 'Microsoft UEFI CA',
+        'certs' : [
+            MS_3RD,
+        ],
+    },
+
+    #
+    # redhat / rhel keys
+    #
     'rhel-2014' : {
         'desc'  : 'Red Hat Enterprise Linux (obsoleted by 2020 signing key rotation)',
         'certs' : [
@@ -52,12 +65,20 @@ DISTRO_CA = {
             resource_filename('virt.firmware', 'certs/RedHatUEFICA2023.pem'),
         ],
     },
+
+    #
+    # fedora keys
+    #
     'fedora' : {
         'desc'  : 'Fedora Linux',
         'certs' : [
             resource_filename('virt.firmware', 'certs/fedoraca-20200709.pem'),
         ],
     },
+
+    #
+    # centos keys
+    #
     'centos-2018' : {
         'desc'  : 'CentOS Stream (obsoleted by 2020 signing key rotation)',
         'certs' : [
