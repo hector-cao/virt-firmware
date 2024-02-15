@@ -189,7 +189,7 @@ def find_volume(item, nameguid = None, typeguid = None):
                 return r
     return None
 
-def measure_volume(banks, name, vol):
+def measure_volume(banks, vol):
     result = {
         'pcr'          : 0,
         'digests'      : hash_digest(banks, vol.blob),
@@ -212,10 +212,10 @@ def measure_image(banks, image, version = None):
         result.append(measure_version(banks, version))
     if peifv:
         peifv.base = 0x820000
-        result.append(measure_volume(banks, 'PEIFV', peifv))
+        result.append(measure_volume(banks, peifv))
     if dxefv:
         dxefv.base = 0x900000
-        result.append(measure_volume(banks, 'DXEFV', dxefv))
+        result.append(measure_volume(banks, dxefv))
 
     if varfv:
         edk2store = edk2.Edk2VarStore(image.name)
