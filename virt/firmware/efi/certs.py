@@ -26,6 +26,7 @@ MS_WIN_2023 = resource_filename('virt.firmware', 'certs/WindowsUEFICA2023.pem')
 
 # microsoft: used to sign 3rd party binaries (shim.efi, drivers).
 MS_3RD_2011 = resource_filename('virt.firmware', 'certs/MicrosoftCorporationUEFICA2011.pem')
+MS_3RD_2023 = resource_filename('virt.firmware', 'certs/MicrosoftUEFICA2023.pem')
 
 # for backward compatibility
 MS_KEK = MS_KEK_2011
@@ -48,6 +49,7 @@ DISTRO_CA = {
         'desc'  : 'Microsoft UEFI CA',
         'certs' : [
             MS_3RD_2011,
+            MS_3RD_2023,
         ],
     },
 
