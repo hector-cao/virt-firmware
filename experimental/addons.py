@@ -22,7 +22,12 @@ ESP_PATH = linuxcfg.LinuxOsInfo().esp_path()
 DEFAULT_RPM_LOCATION = '/usr/lib/linux/'
 DEFAULT_RPM_GLOBAL_LOCATION = DEFAULT_RPM_LOCATION + 'extra.d/'
 GLOBAL_ADDONS_LOCATION = ESP_PATH + '/loader/addons/'
-UKIFY_PATH = '/usr/lib/systemd/ukify'
+
+UKIFY_PATH = None
+for udir in ('/usr/bin', '/usr/lib/systemd'):
+    ubin = f'{udir}/ukify'
+    if os.path.exists(ubin):
+        UKIFY_PATH = ubin
 
 
 def get_devpath(optdata):
