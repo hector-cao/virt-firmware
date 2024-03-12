@@ -10,11 +10,11 @@ from virt.firmware.varstore import edk2
 from virt.firmware.varstore import jstore
 
 def open_varstore(filename):
-    if edk2.Edk2VarStore.probe(filename):
-        return edk2.Edk2VarStore(filename)
-
     if edk2.Edk2VarStoreQcow2.probe(filename):
         return edk2.Edk2VarStoreQcow2(filename)
+
+    if edk2.Edk2VarStore.probe(filename):
+        return edk2.Edk2VarStore(filename)
 
     if aws.AwsVarStore.probe(filename):
         return aws.AwsVarStore(filename)
