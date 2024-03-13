@@ -22,8 +22,7 @@ def ls_files(flist, verbose, basename = False):
         pname = filename
         if basename:
             pname = '  ' + os.path.basename(pname)
-        if plen < len(pname):
-            plen = len(pname)
+        plen = max(plen, len(pname))
 
     for filename in flist:
         # read filename
