@@ -451,20 +451,22 @@ class EfiVarList(collections.UserDict):
         self.set_bool('CustomMode', False)
 
     def enroll_platform_with_cert(self, cert,
-                                  guid = guids.OvmfEnrollDefaultKeys):
+                                  guid = guids.OvmfEnrollDefaultKeys,
+                                  ms_kek = 'all'):
         self.add_cert('PK', guid, cert, True)
         self.add_cert('KEK', guid, cert, True)
-        self.add_cert('KEK', guids.MicrosoftVendor, certs.MS_KEK_2011, False)
-        # 2024-03: Microsoft SVVP test suite doesn't know the new KEK (yet?).
-        #self.add_cert('KEK', guids.MicrosoftVendor, certs.MS_KEK_2023, False)
+        if ms_kek in ('2011', 'all'):
+            self.add_cert('KEK', guids.MicrosoftVendor, certs.MS_KEK_2011, False)
+        if ms_kek in ('2023', 'all'):
+            self.add_cert('KEK', guids.MicrosoftVendor, certs.MS_KEK_2023, False)
         self.add_dummy_dbx(guids.OvmfEnrollDefaultKeys)
 
-    def enroll_platform_redhat(self):
-        self.enroll_platform_with_cert(certs.REDHAT_PK)
+    def enroll_platform_redhat(self, ms_kek = 'all'):
+        self.enroll_platform_with_cert(certs.REDHAT_PK, ms_kek = ms_kek)
 
-    def enroll_platform_generate(self, name):
+    def enroll_platform_generate(self, name, ms_kek = 'all'):
         pk = certs.pk_generate(cn = name)
-        self.enroll_platform_with_cert(pk.name)
+        self.enroll_platform_with_cert(pk.name, ms_kek = ms_kek)
 
     def add_microsoft_keys(self):
         self.add_cert('db', guids.MicrosoftVendor, certs.MS_WIN_2011, False)

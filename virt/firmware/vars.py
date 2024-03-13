@@ -118,7 +118,10 @@ def main():
                         help = 'enroll using generated cert with given common name', metavar = "CN")
     pgroup.add_argument('--no-microsoft', dest = 'microsoft',
                         action = 'store_false', default = True,
-                        help = 'do not add microsoft keys')
+                        help = 'do not add microsoft keys to db')
+    pgroup.add_argument('--microsoft-kek', dest = 'ms_kek',
+                        choices = [ 'none', '2011', '2023', 'all' ], default = 'all',
+                        help = 'choose microsoft KEK keys to enroll')
     pgroup.add_argument('--distro-keys', dest = 'distro', type = str, action = 'append',
                         help = 'add ca keys for DISTRO', metavar = 'DISTRO')
     pgroup.add_argument('--distro-list', dest = 'distrolist',
@@ -238,17 +241,19 @@ def main():
             varlist[key] = item
 
     if options.redhat:
-        varlist.enroll_platform_redhat()
+        varlist.enroll_platform_redhat(ms_kek = options.ms_kek)
         if options.microsoft:
             varlist.add_microsoft_keys()
 
     if options.enroll_cert:
-        varlist.enroll_platform_with_cert(options.enroll_cert)
+        varlist.enroll_platform_with_cert(options.enroll_cert,
+                                          ms_kek = options.ms_kek)
         if options.microsoft:
             varlist.add_microsoft_keys()
 
     if options.enroll_generate:
-        varlist.enroll_platform_generate(options.enroll_generate)
+        varlist.enroll_platform_generate(options.enroll_generate,
+                                         ms_kek = options.ms_kek)
         if options.microsoft:
             varlist.add_microsoft_keys()
 
