@@ -18,6 +18,7 @@ class EfiBootConfig:
     """ efi boot configuration """
 
     def __init__(self):
+        self.secureboot  = False
         self.bootorder   = None
         self.bootcurrent = None
         self.bootnext    = None
@@ -186,3 +187,7 @@ class VarStoreEfiBootConfig(EfiBootConfig):
             var = self.varlist.get(f'Boot{nr:04X}')
             if var:
                 self.bentr[nr] = bootentry.BootEntry(data = var.data)
+
+        sb = self.varlist.get('SecureBootEnable')
+        if sb and sb.data[0]:
+            self.secureboot = True

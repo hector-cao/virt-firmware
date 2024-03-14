@@ -77,6 +77,9 @@ class LinuxEfiBootConfig(bootcfg.EfiBootConfig):
             if var:
                 self.bentr[nr] = bootentry.BootEntry(data = var.data)
 
+        sb = self.linux_read_variable('SecureBoot')
+        if sb and sb.data[0]:
+            self.secureboot = True
 
 class LinuxEfiFile:
     """ class representing a file on a linux file system which we want reference in efi """
