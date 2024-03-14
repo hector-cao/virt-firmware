@@ -117,6 +117,8 @@ class EfiBootConfig:
     def find_devpath_entry(self, devicepath):
         blob = bytes(devicepath)
         for (nr, entry) in self.bentr.items():
+            if not entry:
+                continue
             if blob == bytes(entry.devicepath):
                 return nr
         return None
