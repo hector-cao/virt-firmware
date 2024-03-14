@@ -33,7 +33,7 @@ def update_next_or_order(cfg, options, nr):
 
 
 def add_uki(cfg, options):
-    if not options.shim:
+    if not options.shim and cfg.secureboot:
         logging.error('shim binary not specified')
         sys.exit(1)
     if not options.title:
@@ -42,18 +42,26 @@ def add_uki(cfg, options):
 
     efiuki = linuxcfg.LinuxEfiFile(options.adduki)
     nr = cfg.find_uki_entry(efiuki.efi_filename())
+    if nr is None:
+        nr = cfg.find_devpath_entry(efiuki.dev_path_file())
     if nr is not None:
         logging.info('Entry exists (Boot%04X)', nr)
     else:
-        efishim = linuxcfg.LinuxEfiFile(options.shim)
-        if efishim.device != efiuki.device:
-            logging.error('shim and uki are on different filesystems')
-            sys.exit(1)
-        optdata = ucs16.from_string(efiuki.efi_filename())
-        entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
-                                    attr = bootentry.LOAD_OPTION_ACTIVE,
-                                    devicepath = efishim.dev_path_file(),
-                                    optdata = bytes(optdata))
+        if options.shim:
+            efishim = linuxcfg.LinuxEfiFile(options.shim)
+            if efishim.device != efiuki.device:
+                logging.error('shim and uki are on different filesystems')
+                sys.exit(1)
+            optdata = ucs16.from_string(efiuki.efi_filename())
+            entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
+                                        attr = bootentry.LOAD_OPTION_ACTIVE,
+                                        devicepath = efishim.dev_path_file(),
+                                        optdata = bytes(optdata))
+        else:
+            entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
+                                        attr = bootentry.LOAD_OPTION_ACTIVE,
+                                        devicepath = efiuki.dev_path_file())
+
         logging.info('Create new entry: %s', str(entry))
         nr = cfg.add_entry(entry)
         logging.info('Added entry (Boot%04X)', nr)
@@ -67,6 +75,8 @@ def update_uki(cfg, options):
     efiuki = linuxcfg.LinuxEfiFile(options.updateuki)
     nr = cfg.find_uki_entry(efiuki.efi_filename())
     if nr is None:
+        nr = cfg.find_devpath_entry(efiuki.dev_path_file())
+    if nr is None:
         logging.error('No entry found for %s', options.updateuki)
         sys.exit(1)
 
@@ -76,6 +86,8 @@ def update_uki(cfg, options):
 def remove_uki(cfg, options):
     efiuki = linuxcfg.LinuxEfiFile(options.removeuki)
     nr = cfg.find_uki_entry(efiuki.efi_filename())
+    if nr is None:
+        nr = cfg.find_devpath_entry(efiuki.dev_path_file())
     if nr is None:
         logging.warning('No entry found for %s', options.removeuki)
         return
