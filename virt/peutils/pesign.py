@@ -141,6 +141,8 @@ def pe_check_cert(siglist, variable):
                         return sigcert
                     except (ValueError, TypeError):
                         pass
+                    except cryptography.exceptions.InvalidSignature:
+                        pass
                     if sigcert == dbcert.x509:
                         return sigcert
     return None
