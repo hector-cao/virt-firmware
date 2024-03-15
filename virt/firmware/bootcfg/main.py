@@ -263,7 +263,7 @@ def main():
         remove_uki(cfg, options)
     elif options.bootok:
         boot_success(cfg, options)
-        if options.updatecsv:
+        if options.updatecsv and cfg.secureboot:
             update_boot_csv(cfg, options)
     elif options.updatecsv:
         update_boot_csv(cfg, options)
