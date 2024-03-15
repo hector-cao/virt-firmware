@@ -11,6 +11,7 @@ import logging
 import pkg_resources
 
 from cryptography import x509
+from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.serialization import pkcs7
 
 from virt.firmware.efi import guids
@@ -141,7 +142,7 @@ def pe_check_cert(siglist, variable):
                         return sigcert
                     except (ValueError, TypeError):
                         pass
-                    except cryptography.exceptions.InvalidSignature:
+                    except InvalidSignature:
                         pass
                     if sigcert == dbcert.x509:
                         return sigcert
