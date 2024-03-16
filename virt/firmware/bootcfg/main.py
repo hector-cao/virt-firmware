@@ -52,15 +52,25 @@ def add_uki(cfg, options):
             if efishim.device != efiuki.device:
                 logging.error('shim and uki are on different filesystems')
                 sys.exit(1)
-            optdata = ucs16.from_string(efiuki.efi_filename())
+            if options.cmdline:
+                optdata = ucs16.from_string(efiuki.efi_filename() + ' ' + options.cmdline)
+            else:
+                optdata = ucs16.from_string(efiuki.efi_filename())
             entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
                                         attr = bootentry.LOAD_OPTION_ACTIVE,
                                         devicepath = efishim.dev_path_file(),
                                         optdata = bytes(optdata))
         else:
-            entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
-                                        attr = bootentry.LOAD_OPTION_ACTIVE,
-                                        devicepath = efiuki.dev_path_file())
+            if options.cmdline:
+                optdata = ucs16.from_string(options.cmdline)
+                entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
+                                            attr = bootentry.LOAD_OPTION_ACTIVE,
+                                            devicepath = efiuki.dev_path_file(),
+                                            optdata = bytes(optdata))
+            else:
+                entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
+                                            attr = bootentry.LOAD_OPTION_ACTIVE,
+                                            devicepath = efiuki.dev_path_file())
 
         logging.info('Create new entry: %s', str(entry))
         nr = cfg.add_entry(entry)
@@ -197,6 +207,9 @@ def main():
                        help = 'update boot entry for UKI image FILE', metavar = 'FILE')
     group.add_argument('--remove-uki', dest = 'removeuki', type = str,
                        help = 'remove boot entry for UKI image FILE', metavar = 'FILE')
+    group.add_argument('--cmdline', dest = 'cmdline', type = str,
+                       help = 'override UKIs cmdline when adding boot entry '
+                       '(ignored when Secure Boot is enabled)', metavar = 'CMDLINE')
     group.add_argument('--boot-ok', '--boot-successful', dest = 'bootok',
                        action = 'store_true', default = False,
                        help = 'boot is successful, update BootOrder to have '
