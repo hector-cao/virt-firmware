@@ -55,6 +55,8 @@ def add_uki(cfg, options):
     if not options.title:
         logging.error('entry title not specified')
         sys.exit(1)
+    if options.cmdline and cfg.secureboot:
+        logging.warning("Overriding built-in UKI cmdline is not possible when Secure Boot is enabled")
 
     efiuki = linuxcfg.LinuxEfiFile(options.adduki)
     nr = cfg.find_uki_entry(efiuki.efi_filename())
