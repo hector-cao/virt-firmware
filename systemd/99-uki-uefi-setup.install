@@ -68,9 +68,28 @@ case "$COMMAND" in
             sync
         fi
 
-        [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
-            echo "Adding $UKI_FILE_ESP to UEFI boot entries"
-        kernel-bootcfg $LOGLEVEL --add-uki "$UKI_FILE_ESP" --title "$KERNEL_VERSION" --once
+        # Adapted from systemd's 90-loadentry.install
+        if [ -n "$KERNEL_INSTALL_CONF_ROOT" ]; then
+            if [ -f "$KERNEL_INSTALL_CONF_ROOT/cmdline" ]; then
+                CMDLINE="$(tr -s "$IFS" ' ' <"$KERNEL_INSTALL_CONF_ROOT/cmdline")"
+            fi
+        elif [ -f /etc/kernel/cmdline ]; then
+            CMDLINE="$(tr -s "$IFS" ' ' </etc/kernel/cmdline)"
+        elif [ -f /usr/lib/kernel/cmdline ]; then
+            CMDLINE="$(tr -s "$IFS" ' ' </usr/lib/kernel/cmdline)"
+        else
+            CMDLINE=
+        fi
+
+        if [ -n $CMDLINE ]; then
+            [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
+                echo "Adding $UKI_FILE_ESP to UEFI boot entries with cmdline: $CMDLINE"
+            kernel-bootcfg $LOGLEVEL --add-uki "$UKI_FILE_ESP" --title "$KERNEL_VERSION" --cmdline "$CMDLINE" --once
+        else
+            [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
+                echo "Adding $UKI_FILE_ESP to UEFI boot entries"
+            kernel-bootcfg $LOGLEVEL --add-uki "$UKI_FILE_ESP" --title "$KERNEL_VERSION" --once
+        fi
         ;;
     *)
         exit 0
