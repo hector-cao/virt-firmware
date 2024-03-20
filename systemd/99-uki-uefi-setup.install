@@ -81,7 +81,7 @@ case "$COMMAND" in
             CMDLINE=
         fi
 
-        if [ -n $CMDLINE ]; then
+        if [ -n "$CMDLINE" ]; then
             [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
                 echo "Adding $UKI_FILE_ESP to UEFI boot entries with cmdline: $CMDLINE"
             kernel-bootcfg $LOGLEVEL --add-uki "$UKI_FILE_ESP" --title "$KERNEL_VERSION" --cmdline "$CMDLINE" --once
