@@ -101,9 +101,13 @@ class EfiBootConfig:
         for (nr, entry) in self.bentr.items():
             if not entry or not entry.optdata:
                 continue
-            optpath = str(ucs16.from_ucs16(entry.optdata, 0)).split()[0]
-            if optpath == str(uki):
-                return nr
+            try:
+                optpath = str(ucs16.from_ucs16(entry.optdata, 0)).split()[0]
+            except UnicodeDecodeError:
+                continue
+            else:
+                if optpath == str(uki):
+                    return nr
         return None
 
     def find_title_entry(self, title):
