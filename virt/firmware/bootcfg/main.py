@@ -9,12 +9,17 @@ import sys
 import logging
 import argparse
 
+import pefile
+
 from virt.firmware.efi import ucs16
+from virt.firmware.efi import guids
 from virt.firmware.efi import devpath
 from virt.firmware.efi import bootentry
 
 from virt.firmware.bootcfg import bootcfg
 from virt.firmware.bootcfg import linuxcfg
+
+from virt.peutils import pesign
 
 
 ########################################################################
@@ -32,9 +37,20 @@ def update_next_or_order(cfg, options, nr):
             cfg.linux_update_order()
 
 
+def firmware_loads_efi_binary(cfg, efibinary):
+    if not cfg.secureboot:
+        return True
+    db = cfg.varstore.get_variable('db', guids.EfiImageSecurityDatabase)
+    pe = pefile.PE(efibinary)
+    siglist = pesign.pe_type2_signatures(pe)
+    if pesign.pe_check_cert(siglist, db):
+        return True
+    return True
+
+
 def add_uki(cfg, options):
-    if not options.shim and cfg.secureboot:
-        logging.error('shim binary not specified')
+    if not options.shim and not firmware_loads_efi_binary(cfg, options.adduki):
+        logging.error('shim binary needed but not found or specified')
         sys.exit(1)
     if not options.title:
         logging.error('entry title not specified')
