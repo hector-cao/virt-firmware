@@ -45,7 +45,7 @@ def firmware_loads_efi_binary(cfg, efibinary):
     siglist = pesign.pe_type2_signatures(pe)
     if pesign.pe_check_cert(siglist, db):
         return True
-    return True
+    return False
 
 
 def add_uki(cfg, options):
