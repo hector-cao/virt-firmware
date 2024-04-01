@@ -103,7 +103,7 @@ class EfiBootConfig:
                 continue
             try:
                 optpath = str(ucs16.from_ucs16(entry.optdata, 0)).split()[0]
-            except UnicodeDecodeError:
+            except (UnicodeDecodeError, IndexError):
                 continue
             else:
                 if optpath == str(uki):
