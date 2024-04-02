@@ -127,8 +127,8 @@ def remove_uki(cfg, options):
 
 
 def boot_success(cfg, options):
-    if len(cfg.blist) and cfg.bcurr == cfg.blist[0]:
-        logging.info('No update needed, BootCurrent already comes first in BootOrder.')
+    if cfg.bcurr in cfg.blist:
+        logging.info('No update needed, BootCurrent is already in BootOrder.')
         return
     logging.info('Add BootCurrent (Boot%04X) to BootOrder', cfg.bcurr)
     cfg.set_boot_order(cfg.bcurr, 0)
