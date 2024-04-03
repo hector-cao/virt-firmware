@@ -64,7 +64,7 @@ test-rpm:
     - job: package
       artifacts: true
   before_script:
-    - dnf install -y make diffutils help2man edk2-ovmf
+    - dnf install -y make diffutils help2man edk2-ovmf /usr/bin/systemd-detect-virt
     - dnf install -y edk2-aarch64 || true # optional
   script:
     - dnf install -y rpms/noarch/*.noarch.rpm
