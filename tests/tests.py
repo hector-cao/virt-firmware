@@ -2,6 +2,7 @@ import os
 import json
 import argparse
 import unittest
+import subprocess
 
 from virt.firmware.efi import certs
 from virt.firmware.efi import efivar
@@ -21,6 +22,18 @@ VARS_SECBOOT = "/usr/share/OVMF/OVMF_VARS.secboot.fd"
 TEST_DATA    = os.path.join(os.path.dirname(__file__), "data")
 TEST_AWS     = os.path.join(TEST_DATA, 'secboot.aws')
 TEST_DBX     = os.path.join(TEST_DATA, 'DBXUpdate-20100307.x64.bin')
+
+cache_detect_container = None
+
+def detect_container():
+    global cache_detect_container
+    if cache_detect_container is None:
+        result = subprocess.run([ 'systemd-detect-virt', '--container', '--quiet' ])
+        if result.returncode == 0:
+            cache_detect_container = True
+        else:
+            cache_detect_container = False
+    return cache_detect_container
 
 class TestsEdk2(unittest.TestCase):
 
@@ -104,6 +117,7 @@ class TestsEdk2(unittest.TestCase):
     def test_generate_pk(self):
         certs.pk_generate()
 
+    @unittest.skipIf(detect_container(), 'in container')
     @unittest.skipUnless(os.path.exists('/sys/firmware/efi/efivars'), 'no efivars fs')
     def test_add_uki(self):
         info = linuxcfg.LinuxOsInfo()
