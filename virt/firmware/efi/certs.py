@@ -72,7 +72,7 @@ DISTRO_CA = {
     'rh-uefi' : {
         'desc'  : 'Red Hat UEFI CA',
         'certs' : [
-            resource_filename('virt.firmware', 'certs/RedHatUEFICA2023.pem'),
+            resource_filename('virt.firmware', 'certs/RedHatUEFICA2024.pem'),
         ],
     },
 
