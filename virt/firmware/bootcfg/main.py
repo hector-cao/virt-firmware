@@ -40,6 +40,9 @@ def update_next_or_order(cfg, options, nr):
 def firmware_loads_efi_binary(cfg, efibinary):
     if not cfg.secureboot:
         return True
+    if pesign.cryptography_major < 40:
+        # can't use pesign.pe_check_cert() -> play safe
+        return False
     db = cfg.varstore.get_variable('db', guids.EfiImageSecurityDatabase)
     pe = pefile.PE(efibinary)
     siglist = pesign.pe_type2_signatures(pe)

@@ -129,6 +129,8 @@ def is_cert_issuer_in_sigdb(cert, variable):
 #
 # The pkcs7 signature itself is NOT verified.
 #
+# This requires cryptography_major >= 40.
+#
 def pe_check_cert(siglist, variable):
     if not variable:
         return None
