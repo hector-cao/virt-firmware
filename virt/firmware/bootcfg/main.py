@@ -230,8 +230,7 @@ def main():
                        '(ignored when Secure Boot is enabled)', metavar = 'CMDLINE')
     group.add_argument('--boot-ok', '--boot-successful', dest = 'bootok',
                        action = 'store_true', default = False,
-                       help = 'boot is successful, update BootOrder to have '
-                       'current entry listed first.')
+                       help = 'boot is successful, add BootCurrent to BootOrder.')
     group.add_argument('--update-csv', dest = 'updatecsv',
                        action = 'store_true', default = False,
                        help = 'update BOOT.CSV')
