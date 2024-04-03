@@ -1,5 +1,6 @@
 import os
 import json
+import argparse
 import unittest
 
 from virt.firmware.efi import certs
@@ -10,6 +11,9 @@ from virt.firmware.efi import devpath
 from virt.firmware.varstore import edk2
 from virt.firmware.varstore import linux
 from virt.firmware.varstore import aws
+
+from virt.firmware.bootcfg import linuxcfg
+from virt.firmware.bootcfg import main as bcfgmain
 
 VARS_EMPTY   = "/usr/share/OVMF/OVMF_VARS.fd"
 VARS_SECBOOT = "/usr/share/OVMF/OVMF_VARS.secboot.fd"
@@ -99,6 +103,21 @@ class TestsEdk2(unittest.TestCase):
 
     def test_generate_pk(self):
         certs.pk_generate()
+
+    @unittest.skipUnless(os.path.exists('/sys/firmware/efi/efivars'), 'no efivars fs')
+    def test_add_uki(self):
+        info = linuxcfg.LinuxOsInfo()
+        esp  = info.esp_path()
+        shim = info.shim_path()
+        cfg  = linuxcfg.LinuxEfiBootConfig()
+        options = argparse.Namespace(shim      = shim,
+                                     title     = 'test',
+                                     adduki    = f'{esp}/EFI/Linux/test.eki',
+                                     cmdline   = None,
+                                     bootnext  = True,
+                                     bootorder = None,
+                                     dryrun    = True)
+        bcfgmain.add_uki(cfg, options)
 
 if __name__ == '__main__':
     unittest.main()
