@@ -51,6 +51,34 @@ def firmware_loads_efi_binary(cfg, efibinary):
     return False
 
 
+def create_boot_entry(efiuki, options):
+    if options.shim:
+        efishim = linuxcfg.LinuxEfiFile(options.shim)
+        if efishim.device != efiuki.device:
+            logging.error('shim and uki are on different filesystems')
+            sys.exit(1)
+        if options.cmdline:
+            optdata = ucs16.from_string(efiuki.efi_filename() + ' ' + options.cmdline)
+        else:
+            optdata = ucs16.from_string(efiuki.efi_filename())
+        entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
+                                    attr = bootentry.LOAD_OPTION_ACTIVE,
+                                    devicepath = efishim.dev_path_file(),
+                                    optdata = bytes(optdata))
+    else:
+        if options.cmdline:
+            optdata = ucs16.from_string(options.cmdline)
+            entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
+                                        attr = bootentry.LOAD_OPTION_ACTIVE,
+                                        devicepath = efiuki.dev_path_file(),
+                                        optdata = bytes(optdata))
+        else:
+            entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
+                                        attr = bootentry.LOAD_OPTION_ACTIVE,
+                                        devicepath = efiuki.dev_path_file())
+    return entry
+
+
 def add_uki(cfg, options):
     if not options.shim and not firmware_loads_efi_binary(cfg, options.adduki):
         logging.error('shim binary needed but not found or specified')
@@ -59,7 +87,8 @@ def add_uki(cfg, options):
         logging.error('entry title not specified')
         sys.exit(1)
     if options.cmdline and cfg.secureboot:
-        logging.warning("Overriding built-in UKI cmdline is not possible when Secure Boot is enabled")
+        logging.warning('Overriding built-in UKI cmdline is not possible'
+                        ' when Secure Boot is enabled')
 
     efiuki = linuxcfg.LinuxEfiFile(options.adduki)
     nr = cfg.find_uki_entry(efiuki.efi_filename())
@@ -68,31 +97,7 @@ def add_uki(cfg, options):
     if nr is not None:
         logging.info('Entry exists (Boot%04X)', nr)
     else:
-        if options.shim:
-            efishim = linuxcfg.LinuxEfiFile(options.shim)
-            if efishim.device != efiuki.device:
-                logging.error('shim and uki are on different filesystems')
-                sys.exit(1)
-            if options.cmdline:
-                optdata = ucs16.from_string(efiuki.efi_filename() + ' ' + options.cmdline)
-            else:
-                optdata = ucs16.from_string(efiuki.efi_filename())
-            entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
-                                        attr = bootentry.LOAD_OPTION_ACTIVE,
-                                        devicepath = efishim.dev_path_file(),
-                                        optdata = bytes(optdata))
-        else:
-            if options.cmdline:
-                optdata = ucs16.from_string(options.cmdline)
-                entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
-                                            attr = bootentry.LOAD_OPTION_ACTIVE,
-                                            devicepath = efiuki.dev_path_file(),
-                                            optdata = bytes(optdata))
-            else:
-                entry = bootentry.BootEntry(title = ucs16.from_string(options.title),
-                                            attr = bootentry.LOAD_OPTION_ACTIVE,
-                                            devicepath = efiuki.dev_path_file())
-
+        entry = create_boot_entry(efiuki, options)
         logging.info('Create new entry: %s', str(entry))
         nr = cfg.add_entry(entry)
         logging.info('Added entry (Boot%04X)', nr)
