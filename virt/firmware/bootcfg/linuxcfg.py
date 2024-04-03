@@ -181,9 +181,16 @@ class LinuxOsInfo(OsRelease):
 
     def esp_path(self):
         if not self.esp:
-            result = subprocess.run([ 'bootctl', '--print-esp-path' ],
-                                    stdout = subprocess.PIPE, check = True)
-            self.esp = result.stdout.decode().strip('\n')
+            try:
+                result = subprocess.run([ 'bootctl', '--print-esp-path' ],
+                                        stdout = subprocess.PIPE, check = True)
+            except (FileNotFoundError, subprocess.CalledProcessError):
+                # If bootctl is not installed find the EFI directory at the usual mount points
+                for candidate in '/efi', '/boot/efi', '/boot/EFI', '/boot':
+                    if os.path.isdir(candidate + '/EFI'):
+                        self.esp = candidate
+            else:
+                self.esp = result.stdout.decode().strip('\n')
         return self.esp
 
     def shim_path(self):
