@@ -21,6 +21,10 @@ def main():
                         help = 'add x509 cert to sigdb, loaded in pem format ' +
                         'from FILE and with owner GUID, can be specified multiple times',
                         metavar = ('GUID', 'FILE'))
+    parser.add_argument('--add-hash', dest = 'hashes',  action = 'append', nargs = 2,
+                        help = 'add sha256 hash to sigdb, with owner GUID, '
+                        'can be specified multiple times',
+                        metavar = ('GUID', 'HASH'))
     parser.add_argument('-p', '--print', dest = 'print',
                         action = 'store_true', default = False,
                         help = 'print sigdb')
@@ -35,6 +39,11 @@ def main():
     if options.certs:
         for item in options.certs:
             sigdb.add_cert(guids.parse_str(item[0]), item[1])
+
+    if options.hashes:
+        for item in options.hashes:
+            sigdb.add_hash(guids.parse_str(item[0]),
+                           bytes.fromhex(item[1]))
 
     if options.print and sigdb:
         for slist in sigdb:
