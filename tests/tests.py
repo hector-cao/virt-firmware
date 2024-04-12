@@ -122,6 +122,8 @@ class TestsEdk2(unittest.TestCase):
     def test_add_uki(self):
         info = linuxcfg.LinuxOsInfo()
         esp  = info.esp_path()
+        if esp is None:
+            return
         shim = info.shim_path()
         cfg  = linuxcfg.LinuxEfiBootConfig()
         options = argparse.Namespace(shim      = shim,
