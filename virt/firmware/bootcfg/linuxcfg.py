@@ -187,7 +187,7 @@ class LinuxOsInfo(OsRelease):
             except (FileNotFoundError, subprocess.CalledProcessError):
                 # If bootctl is not installed find the EFI directory at the usual mount points
                 for candidate in '/efi', '/boot/efi', '/boot/EFI', '/boot':
-                    if os.path.isdir(candidate + '/EFI'):
+                    if os.path.isdir(candidate + '/EFI/BOOT'):
                         self.esp = candidate
             else:
                 self.esp = result.stdout.decode().strip('\n')
