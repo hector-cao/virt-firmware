@@ -21,6 +21,7 @@ from virt.firmware.efi import siglist
 from virt.firmware.varstore import linux
 
 from virt.peutils import pesign
+from virt.peutils import pedecode
 
 def is_ca_cert(cert):
     try:
@@ -88,22 +89,6 @@ def sig_type2(data, ii, extract = False, verbose = False, varlist = None):
             with open(fn, 'wb') as f:
                 f.write(cert.public_bytes(serialization.Encoding.PEM))
 
-def getcstr(data):
-    """ get C string (terminated by null byte) """
-    idx = 0
-    for b in data:
-        if b == 0:
-            break
-        idx += 1
-    return data[:idx]
-
-def pe_string(pe, index):
-    """ lookup string in string table (right after symbol table) """
-    strtab  = pe.FILE_HEADER.PointerToSymbolTable
-    strtab += pe.FILE_HEADER.NumberOfSymbols * 18
-    strtab += index
-    return getcstr(pe.__data__[strtab:])
-
 def pe_section_flags(sec):
     r = '-'
     w = '-'
@@ -157,7 +142,7 @@ def zboot_binary(pe, indent, verbose, varlist = None):
     if zimg != b'zimg':
         return
 
-    zalg = getcstr(alg).decode()
+    zalg = pedecode.getcstr(alg).decode()
     print(f'# {i}zboot: 0x{zoff:x} +0x{zsize:x} ({zalg})')
 
     zdata = pe.__data__[ zoff : zoff + zsize ]
@@ -180,43 +165,36 @@ def zboot_binary(pe, indent, verbose, varlist = None):
 def pe_print_section(pe, sec, indent, verbose, varlist = None):
     i  = f'{"":{indent}s}'
     ii = f'{"":{indent+3}s}'
-    if sec.Name.startswith(b'/'):
-        idx = getcstr(sec.Name[1:])
-        sec.Name = pe_string(pe, int(idx))
-    else:
-        sec.Name = getcstr(sec.Name)
+    secname = pedecode.pe_section_name(pe, sec)
     print(f'# {i}section:'
           f' file 0x{sec.PointerToRawData:08x} +0x{sec.SizeOfRawData:08x}'
           f'  virt 0x{sec.VirtualAddress:08x} +0x{sec.Misc_VirtualSize:08x}'
-          f'  {pe_section_flags(sec)} ({sec.Name.decode()})')
-    if sec.Name == b'.vendor_cert':
-        vcert = sec.get_data()
-        (dbs, dbxs, dbo, dbxo) = struct.unpack_from('<IIII', vcert)
-        if dbs:
-            print(f'# {ii}db: {dbo} +{dbs}')
-            db = vcert [ dbo : dbo + dbs ]
+          f'  {pe_section_flags(sec)} ({secname.decode()})')
+    if secname == b'.vendor_cert':
+        (db, dbx) = pedecode.pe_vendor_cert(sec)
+        if db:
+            print(f'# {ii}db')
             print_vendor_cert(db, ii, verbose)
-        if dbxs:
-            print(f'# {ii}dbx: {dbxo} +{dbxs}')
-            dbx = vcert [ dbxo : dbxo + dbxs ]
+        if dbx:
+            print(f'# {ii}dbx')
             print_vendor_cert(dbx, ii, verbose)
-    if sec.Name == b'.sbatlevel':
+    if secname == b'.sbatlevel':
         levels = sec.get_data()
         (version, poff, loff) = struct.unpack_from('<III', levels)
-        print_sbat_entries(ii, 'previous', getcstr(levels[poff + 4:]))
-        print_sbat_entries(ii, 'latest', getcstr(levels[loff + 4:]))
-    if sec.Name in (b'.sdmagic', b'.data.ident', b'.cmdline',
+        print_sbat_entries(ii, 'previous', pedecode.getcstr(levels[poff + 4:]))
+        print_sbat_entries(ii, 'latest', pedecode.getcstr(levels[loff + 4:]))
+    if secname in (b'.sdmagic', b'.data.ident', b'.cmdline',
                     b'.uname', b'.sbat'):
         lines = sec.get_data().decode().rstrip('\n\0')
         for line in lines.split('\n'):
             print(f'# {ii}{line}')
-    if sec.Name == b'.osrel':
+    if secname == b'.osrel':
         osrel = sec.get_data().decode().rstrip('\n\0')
         entries = osrel.split('\n')
         for entry in entries:
             if entry.startswith('PRETTY_NAME'):
                 print(f'# {ii}{entry}')
-    if sec.Name == b'.linux':
+    if secname == b'.linux':
         print(f'# {ii}embedded binary')
         try:
             npe = pefile.PE(data = sec.get_data())
