@@ -12,12 +12,10 @@ import argparse
 import pefile
 
 from cryptography import x509
-from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import pkcs7
 
 from virt.firmware.efi import guids
-from virt.firmware.efi import siglist
 from virt.firmware.varstore import linux
 
 from virt.peutils import pesign
@@ -46,16 +44,7 @@ def print_cert(cert, ii, verbose = False):
         print(f'# {ii}      issuer  CN: {icn}')
 
 def print_vendor_cert(db, ii, verbose = False):
-    # VENDOR_CERT_FILE
-    try:
-        crt = x509.load_der_x509_certificate(db, default_backend())
-        print_cert(crt, ii, verbose)
-        return
-    except ValueError:
-        pass
-
-    # VENDOR_DB_FILE
-    sigdb = siglist.EfiSigDB(db)
+    sigdb = pedecode.vendor_cert_sigdb(db)
     for sl in sigdb:
         if str(sl.guid) == guids.EfiCertX509:
             print_cert(sl.x509, ii, verbose)
