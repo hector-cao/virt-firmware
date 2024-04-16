@@ -10,7 +10,7 @@ PYLINT_OPTS	+= -d missing-function-docstring	# TODO
 PYLINT_OPTS	+= --extension-pkg-allow-list=crc32c
 
 PKG_VERSION	:= $(shell awk '/version/ { print $$3 }' setup.cfg)
-PKG_TARBALL	:= dist/virt-firmware-$(PKG_VERSION).tar.gz
+PKG_TARBALL	:= dist/virt_firmware-$(PKG_VERSION).tar.gz
 
 MANPAGES	:= man/virt-fw-dump.1
 MANPAGES	+= man/virt-fw-vars.1
