@@ -63,7 +63,7 @@ case "$COMMAND" in
             mkdir -p "$UKI_DIR_ESP"
             mv "$UKI_FILE_BOOT" "$UKI_FILE_ESP" || {
                 echo "Error: could not move '$UKI_FILE_BOOT' to '$UKI_FILE_ESP'." >&2
-	        exit 1
+                exit 1
             }
             sync
         fi
@@ -81,14 +81,37 @@ case "$COMMAND" in
             CMDLINE=
         fi
 
+        unset NAME ID PRETTY_NAME VERSION_ID
+        if [ -f /etc/os-release ]; then
+            # shellcheck source=/dev/null
+            . /etc/os-release
+        elif [ -f /usr/lib/os-release ]; then
+            # shellcheck source=/dev/null
+            . /usr/lib/os-release
+        fi
+
+        if [ -n "$PRETTY_NAME" ]; then
+            TITLE="$PRETTY_NAME $KERNEL_VERSION (UKI)"
+        elif [ -n "$NAME" ] && [ -n "$VERSION_ID" ]
+            TITLE="$NAME $VERSION_ID $KERNEL_VERSION (UKI)"
+        else
+            TITLE="$ENTRY_TOKEN $KERNEL_VERSION (UKI)"
+        fi
+
+        # Add PARTLABEL to the title if the ESP has a special name
+        PARTLABEL="$(df $UKI_FILE_ESP --output=source | tail -1 | xargs -r lsblk --output=PARTLABEL --noheadings)"
+        if [ -n $PARTLABEL ] && [ $PARTLABEL != "EFI System" ] && [ $PARTLABEL != "EFI System Partition" ]; then
+            TITLE="$TITLE on $PARTLABEL"
+        fi
+
         if [ -n "$CMDLINE" ]; then
             [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
                 echo "Adding $UKI_FILE_ESP to UEFI boot entries with cmdline: $CMDLINE"
-            kernel-bootcfg $LOGLEVEL --add-uki "$UKI_FILE_ESP" --title "$KERNEL_VERSION" --cmdline "$CMDLINE" --once
+            kernel-bootcfg $LOGLEVEL --add-uki "$UKI_FILE_ESP" --title "$TITLE" --cmdline "$CMDLINE" --once
         else
             [ "$KERNEL_INSTALL_VERBOSE" -gt 0 ] && \
                 echo "Adding $UKI_FILE_ESP to UEFI boot entries"
-            kernel-bootcfg $LOGLEVEL --add-uki "$UKI_FILE_ESP" --title "$KERNEL_VERSION" --once
+            kernel-bootcfg $LOGLEVEL --add-uki "$UKI_FILE_ESP" --title "$TITLE" --once
         fi
         ;;
     *)

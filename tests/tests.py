@@ -125,6 +125,8 @@ class TestsEdk2(unittest.TestCase):
         if esp is None:
             return
         shim = info.shim_path()
+        if shim is None:
+            return
         cfg  = linuxcfg.LinuxEfiBootConfig()
         options = argparse.Namespace(shim      = shim,
                                      title     = 'test',
