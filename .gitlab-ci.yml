@@ -1,10 +1,10 @@
 image: registry.fedoraproject.org/fedora:latest
 
 .instscript: &instscript
-  - dnf install -y python3-pip python3-setuptools python3-devel python3-cryptography
+  - dnf install -y python3-pip python3-setuptools python3-build python3-devel python3-cryptography
   - dnf install -y make gcc diffutils help2man edk2-ovmf /usr/bin/systemd-detect-virt
   - dnf install -y edk2-aarch64 || true # optional
-  - pip3 install --user crc32c pylint build twine
+  - pip3 install --user crc32c pylint twine
   - export PATH="${PATH}:${HOME}/.local/bin"
 
 .testscript: &testscript
