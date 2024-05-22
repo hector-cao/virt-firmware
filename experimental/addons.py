@@ -19,7 +19,7 @@ from virt.firmware.bootcfg import bootcfg
 from virt.firmware.bootcfg import linuxcfg
 
 ESP_PATH = linuxcfg.LinuxOsInfo().esp_path()
-DEFAULT_RPM_LOCATION = '/usr/lib/linux/'
+DEFAULT_RPM_LOCATION = '/usr/lib/modules/'
 DEFAULT_RPM_GLOBAL_LOCATION = DEFAULT_RPM_LOCATION + 'extra.d/'
 GLOBAL_ADDONS_LOCATION = ESP_PATH + '/loader/addons/'
 
